@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.louisz.zflow.dao.TaskDao">
+	<insert id="insertTask" parameterType="com.louisz.zflow.entity.TaskEntity">
+		INSERT into ZF_TASK (id,
+		name, createTime, variables, flowId ,
+		flowName, processId, processName,
+		state, message ) values ( #{id} , #{name},
+		#{createTime}, #{variables},
+		#{flowId} , #{flowName}, #{processId},
+		#{processName} , #{state}, #{message} )
+	</insert>
+
+	<select id="selectTaskById" parameterType="String" resultType="com.louisz.zflow.entity.TaskEntity">
+		SELECT id, flowId, name , createTime, finishTime, variables, flowName,
+		processId, processName, updateTime, finishTime, state, message FROM ZF_TASK
+		WHERE id=#{Id}
+	</select>
+
+	<update id="updateTask" parameterType="com.louisz.zflow.entity.TaskEntity">
+		UPDATE ZF_TASK SET state =
+		#{state} , finishTime=#{finishTime},
+		variables=#{variables}, message=#{message}, node=#{nodeIp, jdbcType=VARCHAR}
+		<if test="updateTime != null">
+			, updateTime= #{updateTime}
+		</if>
+		WHERE id=#{id}
+	</update>
+
+	<select id="selectTaskByFlowIdAndTaskName" parameterType="com.louisz.zflow.entity.TaskEntity"
+		resultType="com.louisz.zflow.entity.TaskEntity">
+		SELECT id, flowId, name , createTime, finishTime,
+		variables, flowName, processId, processName, updateTime, finishTime,
+		state FROM ZF_TASK WHERE flowId=#{flowId} AND name=#{name}
+	</select>
+
+	<delete id="deleteTasksByFlowId" parameterType="String">
+		DELETE FROM
+		ZF_TASK WHERE flowId=#{flowId}
+	</delete>
+
+</mapper>

@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.louisz.zflow.dao.ProcessDao">
+
+	<select id="findProcessById" parameterType="String" resultType="com.louisz.zflow.entity.ProcessEntity">
+		SELECT id, name, state, createtime, content  FROM ZF_PROCESS WHERE id=#{ID}
+	</select>
+	
+	<insert id="insertProcess" parameterType="com.louisz.zflow.entity.ProcessEntity">
+		INSERT into ZF_PROCESS (id, name, state, createtime, content, updateTime ) values (#{id}, #{name}, #{state}, #{createTime}, #{content}, #{updateTime} )
+	</insert>
+	
+	<delete id="deleteProcessById" parameterType="String">
+		DELETE FROM ZF_PROCESS WHERE id= #{id}
+	</delete>
+</mapper>

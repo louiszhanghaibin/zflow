@@ -1,0 +1,9 @@
+/target/
+/.settings/
+.project
+.classpath
+.cache-main
+.cache-tests
+/.apt_generated/
+/.factorypath
+/bin/

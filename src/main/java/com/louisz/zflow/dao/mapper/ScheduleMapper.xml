@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.louisz.zflow.dao.ScheduleDao">
+
+	<resultMap type="com.louisz.zflow.entity.PlanEntity" id="PlanResult">
+		<id	column="id"  property="id"/>
+		<result column="processId"	property="processId" />
+		<result column="flowName"	property="flowName" />
+		<result column="cron"		property="cron" />
+		<result column="variables"	property="variables" />
+		<result column="state"		property="state" />
+		<result column="createTime"	property="createTime" />
+		<result column="updateTime"	property="updateTime" />	
+	</resultMap>
+	
+	<select id="selectAll"	 resultMap="PlanResult">
+		SELECT * FROM ZF_SCHEDULE 
+	</select>
+
+
+ 	
+ 	
+ 	
+ 	
+</mapper>

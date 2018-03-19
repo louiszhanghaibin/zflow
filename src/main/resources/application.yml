@@ -1,0 +1,66 @@
+server:
+#  address: localhost
+  port: 8088
+
+spring:
+  application:
+    name: zflow
+  
+ # HTTP ENCODING  
+  http:  
+    encoding.charset: UTF-8  
+    encoding.enable: true  
+    encoding.force: true
+    
+  mvc:  
+    view:
+      prefix: /WEB-INF/jsp/
+      suffix: .jsp
+
+  datasource:
+    type: com.zaxxer.hikari.HikariDataSource
+    hikari:
+      driver-class-name: oracle.jdbc.OracleDriver
+      jdbc-url: jdbc:oracle:thin:@192.168.123.34:1521:ocm
+      username: payprod1
+      password: payprod1
+      # 连接只读数据库时配置为true， 保证安全
+      readOnly: false
+      # 自动提交默认true
+      auto-commit: false
+      connectionTimeout: 30000
+      #一个连接idle状态的最大时长（毫秒），超时则被释放（retired），缺省:10分钟
+      idleTimeout: 600000
+      #一个连接的生命时长（毫秒），超时而且没被使用则被释放（retired），缺省:30分钟，建议设置比数据库超时时长少30秒
+      max-lifetime: 1800000
+      #连接池中允许的最大连接数。缺省值：10；推荐的公式：((core_count * 2) + effective_spindle_count)
+      maximum-pool-size: 10
+    
+  #热部署生效  
+  devtools:
+    restart:
+      enabled: true
+      #设置重启的目录
+#      additional-paths: src/main/java
+      #classpath目录下的WEB-INF文件夹内容修改不重启
+      exclude: /WEB-INF/**
+    
+# Discovery Server Access  
+eureka:
+  client:
+    serviceUrl:  
+      defaultZone: http://192.168.117.19:1111/eureka/
+#    instance:
+#      metadataMap:
+#        instanceId: ${spring.application.name}:${spring.application.instance_id:${random.value}}
+
+logging:
+  level:
+    root: info
+log:
+  base: E:\logs
+
+#mybatis
+mybatis:
+  mapper-locations: classpath:com/louisz/zflow/dao/mapper/*.xml
+  config: classpath:mybatis-config.xml

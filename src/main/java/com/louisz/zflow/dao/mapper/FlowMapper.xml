@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.louisz.zflow.dao.FlowDao">
+	<insert id="insertFlow" parameterType="com.louisz.zflow.entity.FlowEntity">
+		INSERT into ZF_FLOW (id,
+		createTime, variables, processId, state, processName, name, father_flow_id )
+		values
+		(#{id}, #{createTime}, #{variables}, #{processId} , #{state} ,
+		#{processName}, #{name} , #{father, jdbcType=VARCHAR})
+	</insert>
+
+	<select id="selectFlowById" parameterType="String" resultType="com.louisz.zflow.entity.FlowEntity">
+		SELECT id, createTime, updateTime, variables, processId, processName,
+		state, name, updateTime, finishTime, father_flow_id FROM ZF_FLOW WHERE id=#{flowId}
+	</select>
+
+	<update id="updateFlowState" parameterType="com.louisz.zflow.entity.FlowEntity">
+		UPDATE ZF_FLOW SET state=#{state}
+		<if test="updateTime != null">
+			,updateTime=#{updateTime}
+		</if>
+		<if test="finishTime != null">
+			, finishTime=#{finishTime}
+		</if>
+		WHERE id = #{id}
+	</update>
+
+	<select id="getFlowSelective" parameterType="Map" resultType="com.louisz.zflow.entity.FlowEntity">
+		SELECT id, createTime, updateTime, variables, processId, processName,
+		state, name, updateTime, finishTime, father_flow_id FROM ZF_FLOW
+		WHERE 1=1
+		<if test="id !=null">
+			and id=#{id}
+		</if>
+		<if test="name !=null">
+			and name=#{name}
+		</if>
+		<if test="processId !=null">
+			and processId=#{processId}
+		</if>
+		<if test="processName !=null">
+			and processName=#{processName}
+		</if>
+		<if test="state !=null">
+			and state=#{state}
+		</if>
+		<if test="variables !=null">
+			and variables=#{variables}
+		</if>
+	</select>
+
+</mapper>

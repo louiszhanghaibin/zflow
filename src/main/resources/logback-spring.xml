@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE xml>
+<configuration debug="false">
+	<contextName>ZFLOW</contextName>
+	
+	<define name="app.ip" class="com.louisz.zflow.util.IpUtil" />
+	<springProperty scope="context" name="app.port" source="server.port" defaultValue="localhost"/>
+	<springProperty scope="context" name="log.base" source="log.base" />
+	<springProperty scope="context" name="instance.id" source="spring.application.name" defaultValue="ZFLOW"/>
+
+<!-- 系统运行日志记录文件begin -->
+	<appender name="system_appender" class="ch.qos.logback.core.rolling.RollingFileAppender">
+		<rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+			<fileNamePattern>${log.base}/${instance.id}/%d{yyyy-MM-dd}/${HOSTNAME}_${app.ip}_${app.port}/info.log.%d{yyyy-MM-dd}.%i</fileNamePattern>
+			<timeBasedFileNamingAndTriggeringPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
+				<maxFileSize>200MB</maxFileSize>
+			</timeBasedFileNamingAndTriggeringPolicy>
+			<!-- 超过31天的日志，会自动删除 -->
+			<maxHistory>31</maxHistory>
+		</rollingPolicy>
+		<encoder>
+			<pattern>%d{yyyy-MM-dd HH:mm:ss.SSS}#%c[%L]#%-5level#[%thread]#%msg%n</pattern>
+			<charset>UTF-8</charset>
+		</encoder>
+		<filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+            <level>INFO</level>  
+        </filter>
+	</appender>
+	<!-- 系统运行日志记录文件end -->
+
+	<!-- 告警日志记录文件（包含WARN和ERROR级别）begin -->
+	<appender name="alarm_appender" class="ch.qos.logback.core.rolling.RollingFileAppender">
+		<rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+			<fileNamePattern>${log.base}/alarm/${HOSTNAME}_${app.ip}_${app.port}/alarm.log.%d{yyyy-MM-dd}</fileNamePattern>
+			<!-- 超过7天的日志，会自动删除 -->
+			<maxHistory>7</maxHistory>
+		</rollingPolicy>
+		<encoder>
+			<pattern>%d{yyyy-MM-dd HH:mm:ss.SSS}#%c[%L]#%-5level#[%thread]#%msg%n</pattern>
+			<!--  日志规范要求为GBK编码 -->
+			<charset>UTF-8</charset>
+		</encoder>
+		<filter class="ch.qos.logback.classic.filter.ThresholdFilter"><!-- 打印错误日志 -->  
+            <level>WARN</level>
+        </filter>
+	</appender>
+	<!-- 告警日志记录文件（包含WARN和ERROR级别）end -->
+	
+	<!-- SPRING日志记录文件begin -->
+	<appender name="spring_appender" class="ch.qos.logback.core.rolling.RollingFileAppender">
+		<rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+			<fileNamePattern>${log.base}/${instance.id}/%d{yyyy-MM-dd}/${HOSTNAME}_${app.ip}_${app.port}/spring.log.%d{yyyy-MM-dd}.%i</fileNamePattern>
+			<timeBasedFileNamingAndTriggeringPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
+				<maxFileSize>200MB</maxFileSize>
+			</timeBasedFileNamingAndTriggeringPolicy>
+			<!-- 超过31天的日志，会自动删除 -->
+			<maxHistory>31</maxHistory>
+		</rollingPolicy>
+		<encoder>
+			<pattern>%d{yyyy-MM-dd HH:mm:ss.SSS}#%c[%L]#%-5level#[%thread]#%msg%n</pattern>
+			<charset>UTF-8</charset>
+		</encoder>
+	</appender>
+	<!-- SPRING日志记录文件end -->
+	
+	<!-- hikariCP日志记录文件begin -->
+	<appender name="hikariCP_appender" class="ch.qos.logback.core.rolling.RollingFileAppender">
+		<rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+			<fileNamePattern>${log.base}/${instance.id}/%d{yyyy-MM-dd}/${HOSTNAME}_${app.ip}_${app.port}/hikariCP.log.%d{yyyy-MM-dd}.%i</fileNamePattern>
+			<timeBasedFileNamingAndTriggeringPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
+				<maxFileSize>200MB</maxFileSize>
+			</timeBasedFileNamingAndTriggeringPolicy>
+			<!-- 超过31天的日志，会自动删除 -->
+			<maxHistory>31</maxHistory>
+		</rollingPolicy>
+		<encoder>
+			<pattern>%d{yyyy-MM-dd HH:mm:ss.SSS}#%c[%L]#%-5level#[%thread]#%msg%n</pattern>
+			<charset>UTF-8</charset>
+		</encoder>
+	</appender>
+	<!-- hikariCP日志记录文件end -->
+
+	<logger name="com.louisz.zflow" additivity="true" level="DEBUG">
+		<appender-ref ref="system_appender" />
+		<appender-ref ref="alarm_appender" />
+	</logger>
+
+	<!--spring 内部日志  additivity 属性为 false ，表示此 loger 的打印信息不再向上级传递 -->
+	<!--  additivity="true" 的话，就会打印两次，因为打印信息向上级传递，logger本身打印一次，root接到后又打印一次 -->
+	<logger name="org.springframework.web" additivity="true" level="INFO">
+		<appender-ref ref="spring_appender" />
+	</logger>
+	<logger name="org.springframework.boot" additivity="true" level="INFO">
+		<appender-ref ref="spring_appender" />
+	</logger>
+	
+	<logger name="com.zaxxer.hikari" additivity="true" level="DEBUG">
+		<appender-ref ref="hikariCP_appender" />
+	</logger>
+
+	<!-- 打印mybatis sql，需要打开控制台打印日志，并且level="DEBUG"时才会显示sql -->
+	<logger name="java.sql.Connection" level="DEBUG" />
+	<logger name="java.sql.PreparedStatement" level="DEBUG" />
+	 
+	<!--控制台打印日志 start -->
+	<!--上生产请注释掉 -->
+	<appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+		<encoder>
+			<pattern>%d{yyyy-MM-dd HH:mm:ss.SSS}#%c[%L]#%-5level#[%thread]#%msg%n</pattern>
+		</encoder>
+	</appender>
+	<root level="DEBUG">
+		<appender-ref ref="STDOUT" />
+	</root>
+	<!--控制台打印日志 end -->
+</configuration>

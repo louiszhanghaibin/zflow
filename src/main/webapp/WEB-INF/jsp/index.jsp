@@ -154,7 +154,7 @@
 	<br/><br/><br/>
 	<h3>deploy process</h3>
 	<h5>please input the absolute file path of a process file below for deploying :</h5>
-	<form action="/deployProcess" method="post" onsubmit="return checkNull('deployFilePath')">
+	<form method="post" onsubmit="return checkNull('deployFilePath')">
 		<table id="dpTable">
 			<tbody id="dpTbody">
 			<tr>
@@ -166,7 +166,12 @@
 			</tr>
 			</tbody>
 			<tr>
-				<td align="right"></td><td align="left"><input type="button" value="submit" onclick="doSubmit('processFilePath', '/deployProcess', 'dpTbody')">&nbsp;<input type="reset" value="reset"></td>
+				<td align="right"></td>
+				<td align="left">
+				<input type="button" value="submit" onclick="doSubmit('processFilePath', '/deployProcess', 'dpTbody')">
+				&nbsp;<input type="reset" value="reset">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+				&nbsp;<input type="button" value="update" onclick="doSubmit('processFilePath', '/forceInsertProcess', 'dpcTbody')">
+				</td>
 			</tr>
 		</table>
 	</form>	
@@ -175,7 +180,7 @@
 	
 	<h5>OR</h5>
 	<h5>please input or copy the exact content of a process file below for deploying :</h5>
-	<form action="/deployProcess" method="post" onsubmit="return checkNull('deployFilePath')" onkeydown="if(event.keyCode==13){return 9;}">
+	<form method="post" onsubmit="return checkNull('deployFilePath')" onkeydown="if(event.keyCode==13){return 9;}">
 		<table id="dpcTable">
 			<tbody id="dpcTbody">
 			<tr>
@@ -200,7 +205,13 @@
 			</tr>
 			</tbody>
 			<tr>
-				<td align="right"></td><td align="left"><input type="button" value="submit" onclick="doSubmit('processFilePath', '/deployProcess', 'dpcTbody')">&nbsp;<input type="reset" value="reset"></td>
+				<td align="right"></td>
+				<td align="left">
+				<input type="button" value="submit" onclick="doSubmit('processFilePath', '/deployProcess', 'dpcTbody')">
+				&nbsp;<input type="reset" value="reset">
+				&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+				<input type="button" value="update" onclick="doSubmit('processFilePath', '/forceInsertProcess', 'dpcTbody')">
+				</td>				
 			</tr>
 		</table>
 	</form>

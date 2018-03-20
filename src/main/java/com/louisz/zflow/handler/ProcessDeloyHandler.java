@@ -47,7 +47,12 @@ public class ProcessDeloyHandler implements Handler {
 		String processId = processEntity.getId();
 		try {
 			ProcessDao processDao = SpringUtil.getBean(ProcessDao.class);
-			if (null != processDao.findProcessById(processId)) {
+			if (isForceDeploy(variablesMap)) {
+				String result = "This process[" + processId
+						+ "] is going to deploy forcely as request,please be aware of that the old process of the same ID will be replaced!";
+				logger.warn(result);
+				processDao.deleteProcessById(processId);
+			} else if (null != processDao.findProcessById(processId)) {
 				String result = "The process ID[" + processId
 						+ "] is already in use, please check if the process is deployed or the processId of the pending process is repeated ";
 				logger.warn(result);
@@ -64,6 +69,27 @@ public class ProcessDeloyHandler implements Handler {
 		logger.info("[" + ZflowConstant.STATE_SUCCESS + "] for deploying process[processId=" + processId
 				+ "] into data base!");
 		return ZflowConstant.STATE_SUCCESS;
+	}
+
+	/**
+	 * judge if the delpoyment is needed to enforce
+	 * 
+	 * @author zhang
+	 * @time 2018年3月20日下午2:27:14
+	 * @param variablesMap
+	 * @return
+	 * @throws Exception
+	 */
+	private boolean isForceDeploy(Map<String, String> variablesMap) throws Exception {
+		boolean b = false;
+		if (variablesMap.containsKey(ZflowConstant.PROCESS_DEPLOY_FORCE)) {
+			String flag = variablesMap.get(ZflowConstant.PROCESS_DEPLOY_FORCE);
+			b = (ZflowConstant.FLAG_YES_LOWER.equals(flag) || ZflowConstant.FLAG_YES_UPPER.equals(flag));
+		} else {
+			return false;
+		}
+
+		return b;
 	}
 
 	/**

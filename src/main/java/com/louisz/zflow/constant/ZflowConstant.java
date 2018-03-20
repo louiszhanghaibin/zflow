@@ -6,6 +6,11 @@ package com.louisz.zflow.constant;
  * @time 2018年2月2日
  */
 public class ZflowConstant {
+	public static final String FLAG_YES_LOWER = "yes";
+	public static final String FLAG_YES_UPPER = "YES";
+	public static final String FLAG_NO_LOWER = "no";
+	public static final String FLAG_NO_UPPER = "NO";
+
 	public static final String ID_UPPER = "ID";
 	public static final String ID_LOWER = "id";
 	public static final String JOB_ID = "jobId";
@@ -27,6 +32,7 @@ public class ZflowConstant {
 	public static final String PROCESS_FILE_CONTENT = "processFileContent";
 
 	public static final String PROCESS_DEPLOY_TYPE = "type";
+	public static final String PROCESS_DEPLOY_FORCE = "forceDeploy";
 	public static final String PROCESS_DEPLOY_TYPE_PATH = "path";
 	public static final String PROCESS_DEPLOY_TYPE_CONTENT = "content";
 	/**

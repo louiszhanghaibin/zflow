@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE xml>
+<process id="Test_Proc" name="Test_Proc">
+	<start name="start">
+		<transition to="test" />
+	</start>
+	<task name="test" refUri="http://ZFLOW/clientTest">
+		<transition to="end" />
+	</task>
+	<end name="end" />
+</process>

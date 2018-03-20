@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE xml>
+<process id="Proc_reparamonly_test" name="Proc_reparamonly_test">
+	<start name="start">
+		<transition to="fork" />
+	</start>
+	<fork name="fork">
+		<transition to="Test_Proc" />
+		<transition to="test" />
+	</fork>
+	<process id="Test_Proc" name="Test_Proc">
+		<transition to="join" />
+	</process>
+	<task name="test" refUri="http://ZFLOW/clientTest">
+		<repeat interval="50" parameters="(testxx1=XXXXXX1)|((testxx2=XXXXXX2))" />
+		<transition to="join" />
+	</task>
+	<join name="join">
+		<transition to="end" />
+	</join>
+	<end name="end" />
+</process>

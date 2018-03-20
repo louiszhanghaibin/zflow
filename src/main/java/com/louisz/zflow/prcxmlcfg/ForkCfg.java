@@ -16,7 +16,7 @@ import com.thoughtworks.xstream.annotations.XStreamImplicit;
 @XStreamAlias("fork")
 public class ForkCfg implements NodeCfg {
 	@XStreamAsAttribute
-	private String Name = "";
+	private String name = "";
 	@XStreamImplicit
 	private List<TransitionCfg> transitions = new ArrayList<>();
 
@@ -25,11 +25,11 @@ public class ForkCfg implements NodeCfg {
 	}
 
 	public String getName() {
-		return Name;
+		return this.name;
 	}
 
 	public void setName(String name) {
-		Name = name;
+		this.name = name;
 	}
 
 	public void setTransitions(List<TransitionCfg> transitions) {
@@ -45,7 +45,7 @@ public class ForkCfg implements NodeCfg {
 	@Override
 	public String toString() {
 		StringBuilder sBuilder = new StringBuilder();
-		sBuilder.append("fork={name=").append(this.Name).append(", ");
+		sBuilder.append("fork={name=").append(this.name);
 		if (null != this.transitions && !this.transitions.isEmpty()) {
 			this.transitions.forEach(transition -> {
 				sBuilder.append(", ").append(transition.toString());

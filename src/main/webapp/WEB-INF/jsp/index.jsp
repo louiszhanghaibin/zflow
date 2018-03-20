@@ -187,7 +187,7 @@
 	&lt;start name=&quot;start&quot;&gt;
 		&lt;transition to=&quot;test&quot; /&gt;
 	&lt;/start&gt;
-	&lt;task name=&quot;test&quot; refUri=&quot;http&#58;//test&quot;&gt;
+	&lt;task name=&quot;test&quot; refUri=&quot;http&#58;//ZFLOW/clientTest&quot;&gt;
 		&lt;transition to=&quot;end&quot; /&gt;
 	&lt;/task&gt;
 	&lt;end name=&quot;end&quot; /&gt;

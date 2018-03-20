@@ -1,10 +1,4 @@
-server:
-#  address: localhost
-  port: 8088
-
 spring:
-  application:
-    name: zflow
   
  # HTTP ENCODING  
   http:  
@@ -53,12 +47,6 @@ eureka:
 #    instance:
 #      metadataMap:
 #        instanceId: ${spring.application.name}:${spring.application.instance_id:${random.value}}
-
-logging:
-  level:
-    root: info
-log:
-  base: E:\logs
 
 #mybatis
 mybatis:

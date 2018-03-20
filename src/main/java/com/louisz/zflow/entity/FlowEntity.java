@@ -151,7 +151,7 @@ public class FlowEntity implements Serializable {
 
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
-		sb.append("Flow (id=").append(this.id);
+		sb.append("Flow={id=").append(this.id);
 		sb.append(",name=").append(this.name);
 		sb.append(",processId=").append(this.processId);
 		sb.append(",processName=").append(this.processName);
@@ -160,7 +160,7 @@ public class FlowEntity implements Serializable {
 		sb.append(",finishTime=").append(this.finishTime);
 		sb.append(", state=").append(this.state);
 		sb.append(",variables=").append(this.variables);
-		sb.append(")");
+		sb.append("}");
 		return sb.toString();
 	}
 

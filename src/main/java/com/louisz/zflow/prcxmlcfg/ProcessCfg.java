@@ -25,8 +25,28 @@ public class ProcessCfg implements NodeCfg {
 	private List<TaskCfg> tasks = new ArrayList<>();
 	@XStreamImplicit
 	private List<ProcessCfg> processes = new ArrayList<>();
+	@XStreamImplicit
+	private List<ForkCfg> forks;
+	@XStreamImplicit
+	private List<JoinCfg> joins;
 
 	private RepeatCfg repeat;
+
+	public List<ForkCfg> getForks() {
+		return forks;
+	}
+
+	public void setForks(List<ForkCfg> forks) {
+		this.forks = forks;
+	}
+
+	public List<JoinCfg> getJoins() {
+		return joins;
+	}
+
+	public void setJoins(List<JoinCfg> joins) {
+		this.joins = joins;
+	}
 
 	@Override
 	public RepeatCfg getRepeat() {
@@ -41,27 +61,7 @@ public class ProcessCfg implements NodeCfg {
 
 	private StartCfg start;
 
-	private ForkCfg fork;
-
-	private JoinCfg join;
-
 	private EndCfg end;
-
-	public ForkCfg getFork() {
-		return fork;
-	}
-
-	public void setFork(ForkCfg fork) {
-		this.fork = fork;
-	}
-
-	public JoinCfg getJoin() {
-		return join;
-	}
-
-	public void setJoin(JoinCfg join) {
-		this.join = join;
-	}
 
 	public EndCfg getEnd() {
 		return end;

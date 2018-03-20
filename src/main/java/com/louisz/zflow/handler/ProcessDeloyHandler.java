@@ -81,7 +81,7 @@ public class ProcessDeloyHandler implements Handler {
 		try {
 			processCfg = ProcessXmlParseUtil.getProcess(content);
 			processEntity = new ProcessEntity();
-			processEntity.setContent(content.getBytes());
+			processEntity.setContent(content);
 			processEntity.setId(processCfg.getId());
 			processEntity.setName(processCfg.getName());
 			processEntity.setState(ZflowConstant.STATE_AVAIABLE);

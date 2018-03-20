@@ -38,6 +38,11 @@ public class TaskExecutionHandler extends AbstractHandler implements Handler {
 	public Object handle(Map<String, String> variablesMap, NodeCfg node) throws Exception {
 		Map<String, String> vMap = new HashMap<>();
 		vMap.putAll(variablesMap);
+		TaskCfg task = (TaskCfg) node;
+
+		vMap.put(ZflowConstant.TASK_NAME, task.getName());
+		vMap.put(ZflowConstant.TASK_REFURI, task.getRefUri());
+		vMap = putFieldsintoVMap(task.getFields(), vMap);
 
 		String processIdPattern = "[processId=" + variablesMap.get(ZflowConstant.PROCESS_ID) + "]";
 		String taskNamePattern = "[name=" + node.getName() + "]";
@@ -48,9 +53,9 @@ public class TaskExecutionHandler extends AbstractHandler implements Handler {
 
 		String result = "";
 		if (isLooporRepeat(vMap, node)) {
-			result = doRepeatHandle(vMap, (TaskCfg) node);
+			result = doRepeatHandle(vMap, task);
 		} else {
-			result = doHandle(vMap, (TaskCfg) node);
+			result = doHandle(vMap, task);
 		}
 
 		return result;
@@ -117,19 +122,22 @@ public class TaskExecutionHandler extends AbstractHandler implements Handler {
 	 */
 	private String doHandle(Map<String, String> vMap, TaskCfg taskCfg) throws Exception {
 		String processIdPattern = "[processId=" + vMap.get(ZflowConstant.PROCESS_ID) + "]";
-		String taskNamePattern = "[name=" + taskCfg.getName() + "]";
 		String jobIdPattern = "[jobId=" + vMap.get(ZflowConstant.JOB_ID) + "]";
-		String flowIdPattern = "[flowId=" + vMap.get(ZflowConstant.FLOW_ID) + "]";
+
+		TaskEntity task = initTaskParams(vMap);
+		String flowIdPattern = "[flowId=" + vMap.get(ZflowConstant.FLOW_ID) + ", taskId=" + task.getId() + "]";
 
 		logger.info(jobIdPattern + flowIdPattern + "Start executing TASK[" + taskCfg.toString() + "] in process"
 				+ processIdPattern + "...");
-		TaskEntity task = initTaskParams(vMap);
+		logger.info(jobIdPattern + flowIdPattern + "Task[name=" + task.getName()
+				+ "] is executing with arguments[variablesMap=" + vMap.toString() + "]...");
+
 		TaskDao taskDao = (TaskDao) SpringUtil.getBean("taskDao");
 		taskDao.insertTask(task);
 
 		// send post request to service nodes
 		RestTemplate restTemplate = (RestTemplate) SpringUtil.getBean(RestTemplate.class);
-		String uri = vMap.get(ZflowConstant.TASK_REFURI);
+		String uri = taskCfg.getRefUri();
 		ReturnResult result;
 		ResponseEntity<ReturnResult> responseEntity;
 		try {
@@ -154,6 +162,7 @@ public class TaskExecutionHandler extends AbstractHandler implements Handler {
 		// service nodes must response the execution result code back to ZFlow
 		String taskCase = (!StringUtil.isEmpty(result.getResult().toString())) ? result.getResult().toString() : "";
 
+		String taskNamePattern = "[taskId=" + task.getId() + ", name=" + taskCfg.getName() + "]";
 		logger.info(jobIdPattern + "[" + taskCase + "]Task" + taskNamePattern + "in process" + processIdPattern
 				+ " execution is done![TASK_MASSAGE: " + result.getDescription() + "]");
 
@@ -225,6 +234,7 @@ public class TaskExecutionHandler extends AbstractHandler implements Handler {
 		taskEntity.setFlowName(vMap.get(ZflowConstant.FLOW_NAME));
 		String taskId = ZflowConstant.TASK_UPPER + ZflowConstant.FLOW_SEPEATOR + DateUtil.getDate(0)
 				+ ZflowConstant.FLOW_SEPEATOR + SequenceUtil.getSequence();
+		vMap.put(ZflowConstant.TASK_ID, taskId);
 		taskEntity.setId(taskId);
 		taskEntity.setName(vMap.get(ZflowConstant.TASK_NAME));
 		taskEntity.setProcessName(vMap.get(ZflowConstant.PROCESS_NAME));

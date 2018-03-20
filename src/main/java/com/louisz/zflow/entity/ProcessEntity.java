@@ -41,7 +41,7 @@ public class ProcessEntity implements Serializable {
 	/**
 	 * 流程定义xml
 	 */
-	private byte[] content;
+	private String content;
 
 	/**
 	 * parsed process XML bean
@@ -96,12 +96,12 @@ public class ProcessEntity implements Serializable {
 		this.updateTime = lastUpdateTime;
 	}
 
-	public byte[] getContent() {
+	public String getContent() {
 		return content;
 	}
 
-	public void setContent(byte[] bytes) {
-		this.content = bytes;
+	public void setContent(String content) {
+		this.content = content;
 	}
 
 	public String toString() {

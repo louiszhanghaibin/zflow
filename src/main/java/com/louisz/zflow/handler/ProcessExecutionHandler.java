@@ -40,8 +40,17 @@ public class ProcessExecutionHandler extends AbstractHandler implements Handler 
 	public Object handle(Map<String, String> variablesMap, NodeCfg nodeCfg) throws Exception {
 		Map<String, String> vMap = new HashMap<>();
 		vMap.putAll(variablesMap);
-		String processId = variablesMap.get(ZflowConstant.PROCESS_ID);
 		String jobIdPattern = "[jobId=" + variablesMap.get(ZflowConstant.JOB_ID) + "]";
+
+		String processId = "";
+		if (null != nodeCfg) {
+			ProcessCfg process = (ProcessCfg) nodeCfg;
+			processId = process.getId();
+			vMap.remove(ZflowConstant.FLOW_ID);
+			vMap = putFieldsintoVMap(process.getFields(), vMap);
+		} else {
+			processId = variablesMap.get(ZflowConstant.PROCESS_ID);
+		}
 
 		logger.info(jobIdPattern + "Handling process[processId=" + processId + "] execution...");
 
@@ -137,6 +146,8 @@ public class ProcessExecutionHandler extends AbstractHandler implements Handler 
 		// initialize the flow entity
 		FlowEntity flow = newFlowInit(processEntity, variablesMap);
 
+		String idPattern = "[jobId=" + variablesMap.get(ZflowConstant.JOB_ID) + ", flowId=" + flow.getId() + "]";
+
 		// insert the flow's information into database
 		logger.info("Flow[" + flow.toString() + "] started...");
 		FlowDao flowDao = (FlowDao) SpringUtil.getBean("flowDao");
@@ -161,7 +172,7 @@ public class ProcessExecutionHandler extends AbstractHandler implements Handler 
 		List<NodeCfg> startNodes = ProcessXmlParseUtil.getNextNodes(process, process.getStart().getTransition());
 		if (1 != startNodes.size()) {
 			logger.error("Process[" + processName + "] does not contain one and only valid node[name=" + nodeName
-					+ "] for starting execution from START[start=" + process.getStart().toString()
+					+ "] for starting execution according to node START[start=" + process.getStart().toString()
 					+ "],process cannot start to execute!");
 			updateFlow(flowDao, ZflowConstant.TASK_STATE_ERROR, flow);
 			return ZflowConstant.TASK_STATE_ERROR;
@@ -232,7 +243,8 @@ public class ProcessExecutionHandler extends AbstractHandler implements Handler 
 				b = (ZflowConstant.STATE_FINISH.equals(future.get())
 						|| ZflowConstant.TASK_STATE_SUCCESS.equals(future.get()));
 				if (!b) {
-					logger.info("Node[name=" + name + "] execution [" + ZflowConstant.STATE_FAILED + "]!");
+					logger.warn(idPattern + "Node[name=" + name + "] execution is [" + ZflowConstant.STATE_FAILED
+							+ "], this flow is [" + ZflowConstant.STATE_FAILED + "]!");
 					updateFlow(flowDao, ZflowConstant.STATE_FAILED, flow);
 					return ZflowConstant.STATE_FAILED;
 				}
@@ -255,7 +267,7 @@ public class ProcessExecutionHandler extends AbstractHandler implements Handler 
 			return ZflowConstant.TASK_STATE_ERROR;
 		}
 
-		logger.info("Flow[name=" + flow.getName() + ", ID=" + flow.getId() + "] executed successfully, this flow is ["
+		logger.info(idPattern + "Process[name=" + processName + "] executed successfully, this flow is ["
 				+ ZflowConstant.STATE_FINISH + "]!");
 		updateFlow(flowDao, ZflowConstant.STATE_FINISH, flow);
 		return ZflowConstant.STATE_FINISH;

@@ -131,6 +131,12 @@ public class ProcessXmlParseUtil {
 		if (null != process.getTasks()) {
 			nodeCfgs.addAll(process.getTasks());
 		}
+		if (null != process.getForks()) {
+			nodeCfgs.addAll(process.getForks());
+		}
+		if (null != process.getJoins()) {
+			nodeCfgs.addAll(process.getJoins());
+		}
 		nodeCfgs.add(process.getEnd());
 		String nodeName = transition.getTo();
 

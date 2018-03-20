@@ -9,6 +9,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.louisz.zflow.constant.ZflowConstant;
+import com.louisz.zflow.prcxmlcfg.FieldCfg;
 import com.louisz.zflow.prcxmlcfg.NodeCfg;
 import com.louisz.zflow.prcxmlcfg.RepeatCfg;
 import com.louisz.zflow.util.StringUtil;
@@ -22,6 +23,28 @@ import com.louisz.zflow.util.StringUtil;
  */
 public abstract class AbstractHandler {
 	Logger logger = LoggerFactory.getLogger(AbstractHandler.class);
+
+	/**
+	 * put the custom parameters into the variables map
+	 * 
+	 * @author zhang
+	 * @time 2018年3月12日下午3:20:43
+	 * @param fields
+	 * @param VMap
+	 * @return
+	 * @throws Exception
+	 */
+	protected Map<String, String> putFieldsintoVMap(List<FieldCfg> fields, Map<String, String> vMap) throws Exception {
+		if (null == fields || 0 == fields.size()) {
+			return vMap;
+		}
+
+		for (FieldCfg fieldCfg : fields) {
+			vMap.put(fieldCfg.getKey(), fieldCfg.getValue());
+		}
+
+		return vMap;
+	}
 
 	/**
 	 * if the node execution is for loop or repeated running
@@ -74,7 +97,8 @@ public abstract class AbstractHandler {
 					: Integer.parseInt(vMap.get(ZflowConstant.LOOP));
 			vMap.remove(ZflowConstant.LOOP);
 
-			paramString = StringUtil.isEmpty(vMap.get(ZflowConstant.REPEAT)) ? "" : vMap.get(ZflowConstant.REPEAT);
+			paramString = StringUtil.isEmpty(vMap.get(ZflowConstant.REPEAT).trim()) ? ""
+					: vMap.get(ZflowConstant.REPEAT).trim();
 			vMap.remove(ZflowConstant.REPEAT);
 
 			repeatMsg = "repeat={loop=" + times + ", parameters=" + paramString + ", interval=" + interval + "ms}";
@@ -84,7 +108,7 @@ public abstract class AbstractHandler {
 			RepeatCfg repeatCfg = node.getRepeat();
 			interval = Integer.toString(repeatCfg.getInterval());
 			times = repeatCfg.getLoop();
-			paramString = StringUtil.isEmpty(repeatCfg.getParameters()) ? "" : repeatCfg.getParameters();
+			paramString = StringUtil.isEmpty(repeatCfg.getParameters().trim()) ? "" : repeatCfg.getParameters().trim();
 			repeatMsg = repeatCfg.toString();
 		} else {
 			Map<String, String> vaMap = new HashMap<>();
@@ -100,20 +124,31 @@ public abstract class AbstractHandler {
 			maps.add(vaMap);
 			times--;
 		}
-		if (0 < maps.size()) {
+		if (!maps.isEmpty()) {
 			return maps;
 		}
 
 		String[] params = paramString.split(ZflowConstant.PROPERTY_SEPRATOR);
 		for (String param : params) {
-			String[] pair = param.replaceAll(ZflowConstant.REPEAT_SYMBOL_REGX, "").split("=");
-			if (2 != pair.length) {
-				logger.error("Error! The parameters of repeat node[" + repeatMsg + "] in node[name=" + node.getName()
-						+ "] is configured incorrectly!");
-				throw new Exception();
+			if (StringUtil.isEmpty(param.trim())) {
+				continue;
 			}
 			Map<String, String> vaMap = new HashMap<>();
-			vaMap.put(pair[0], pair[1]);
+			vaMap.put(ZflowConstant.REPEAT_TIME_INTERVAL, interval);
+			vaMap.putAll(vMap);
+			String[] pairs = param.replaceAll(ZflowConstant.REPEAT_SYMBOL_REGX, "").split(",");
+			for (String pairStr : pairs) {
+				if (StringUtil.isEmpty(pairStr.trim())) {
+					continue;
+				}
+				String[] pair = pairStr.trim().split("=");
+				if (2 != pair.length) {
+					logger.error("Error! The parameters of repeat node[" + repeatMsg + "] in node[name="
+							+ node.getName() + "] is configured incorrectly!");
+					throw new Exception();
+				}
+				vaMap.put(pair[0], pair[1]);
+			}
 			maps.add(vaMap);
 		}
 

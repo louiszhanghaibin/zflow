@@ -1,0 +1,14 @@
+spring:
+  application:
+    name: zflow
+    
+server:
+#  address: localhost
+  port: 8088
+
+logging:
+  config: classpath:logback-spring.xml
+  level:
+    root: info
+log:
+  base: E:\logs

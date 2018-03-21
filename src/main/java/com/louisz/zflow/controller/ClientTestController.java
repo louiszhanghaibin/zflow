@@ -2,6 +2,8 @@ package com.louisz.zflow.controller;
 
 import java.util.Map;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -21,6 +23,7 @@ import com.louisz.zflow.entity.ReturnResult;
  */
 @Controller
 public class ClientTestController {
+	private Logger logger = LoggerFactory.getLogger(ClientTestController.class);
 
 	/**
 	 * mapping for client calling test
@@ -34,6 +37,7 @@ public class ClientTestController {
 	@ResponseBody
 	public ReturnResult zflowTest(@RequestBody Map<String, String> variableMap) {
 		String msg = "Client test is SUCCESS!";
+		logger.info(msg + variableMap.toString());
 		return new ReturnResult(Result.SUCCESS, msg);
 	}
 }

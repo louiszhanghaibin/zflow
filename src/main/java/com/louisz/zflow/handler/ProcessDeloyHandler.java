@@ -54,7 +54,7 @@ public class ProcessDeloyHandler implements Handler {
 				processDao.deleteProcessById(processId);
 			} else if (null != processDao.findProcessById(processId)) {
 				String result = "The process ID[" + processId
-						+ "] is already in use, please check if the process is deployed or the processId of the pending process is repeated ";
+						+ "] is already in use, please check if the process is deployed or the processId of the pending process is repeated!";
 				logger.warn(result);
 				return result;
 			}

@@ -170,7 +170,7 @@
 				<td align="left">
 				<input type="button" value="submit" onclick="doSubmit('processFilePath', '/deployProcess', 'dpTbody')">
 				&nbsp;<input type="reset" value="reset">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-				&nbsp;<input type="button" value="update" onclick="doSubmit('processFilePath', '/forceInsertProcess', 'dpcTbody')">
+				&nbsp;<input type="button" value="update" onclick="doSubmit('processFilePath', '/forceInsertProcess', 'dpTbody')">
 				</td>
 			</tr>
 		</table>

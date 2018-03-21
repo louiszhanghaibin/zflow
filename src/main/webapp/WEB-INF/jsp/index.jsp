@@ -186,7 +186,7 @@
 			<tr>
 				<td align="right">processFileContent:<span style="color: red">*</span></td>
 				<td align="left">
-					<textarea id="processFilePath" name="processFilePath" style="width:500px;height:300px;" >(流程文件内容，如:
+					<textarea id="processFileContent" name="processFileContent" style="width:500px;height:300px;" >(流程文件内容，如:
 &lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;
 &lt;process id=&quot;Test_Proc&quot; name=&quot;Test_Proc&quot;&gt;
 	&lt;start name=&quot;start&quot;&gt;
@@ -207,10 +207,10 @@
 			<tr>
 				<td align="right"></td>
 				<td align="left">
-				<input type="button" value="submit" onclick="doSubmit('processFilePath', '/deployProcess', 'dpcTbody')">
+				<input type="button" value="submit" onclick="doSubmit('processFileContent', '/deployProcess', 'dpcTbody')">
 				&nbsp;<input type="reset" value="reset">
 				&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-				<input type="button" value="update" onclick="doSubmit('processFilePath', '/forceInsertProcess', 'dpcTbody')">
+				<input type="button" value="update" onclick="doSubmit('processFileContent', '/forceInsertProcess', 'dpcTbody')">
 				</td>				
 			</tr>
 		</table>

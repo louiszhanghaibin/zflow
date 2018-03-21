@@ -46,6 +46,7 @@ public class ProcessExecutionHandler extends AbstractHandler implements Handler 
 		if (null != nodeCfg) {
 			ProcessCfg process = (ProcessCfg) nodeCfg;
 			processId = process.getId();
+			vMap.put(ZflowConstant.FLOW_FATHER, vMap.get(ZflowConstant.FLOW_ID));
 			vMap.remove(ZflowConstant.FLOW_ID);
 			vMap = putFieldsintoVMap(process.getFields(), vMap);
 		} else {
@@ -320,8 +321,6 @@ public class ProcessExecutionHandler extends AbstractHandler implements Handler 
 		// if this flow is a child flow, get the father flow information
 		if (vMap.containsKey(ZflowConstant.FLOW_FATHER) && 0 < vMap.get(ZflowConstant.FLOW_FATHER).length()) {
 			flowEntity.setFather(vMap.get(ZflowConstant.FLOW_FATHER));
-		} else {
-			vMap.put(ZflowConstant.FLOW_FATHER, flowId);
 		}
 
 		return flowEntity;

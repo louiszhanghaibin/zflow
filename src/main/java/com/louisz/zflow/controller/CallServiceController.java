@@ -138,47 +138,9 @@ public class CallServiceController {
 	@RequestMapping(value = "/forceInsertProcess", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
 	@ResponseBody
 	public String forceInsertProcess(@RequestBody Map<String, String> variablesMap) {
-		String type = variablesMap.get(ZflowConstant.PROCESS_DEPLOY_TYPE);
-		String result = "";
-		String pathPattern = "";
-		if (ZflowConstant.PROCESS_DEPLOY_TYPE_PATH.equals(type)) {
-			String path = variablesMap.get(ZflowConstant.PROCESS_FILE_PATH);
-			logger.info("Received a request for deploying a process in path[" + path + "]...");
-
-			if (!validateLegalityOfVariables(variablesMap)) {
-				result = "Some parameters did not pass the validation of legality before starting a flow of process[processId="
-						+ variablesMap.get(ZflowConstant.PROCESS_ID)
-						+ "], please make sure there is no illegal parameter along with the request, such as special characters, SQL words and etc.";
-				logger.error(result);
-				return JsonUtil.toJson("ERROR\n" + result);
-			}
-
-			File file = new File(path);
-			if (!file.exists()) {
-				result = "File dose not exist in path[" + path + "]!";
-				logger.warn(result);
-				return JsonUtil.toJson("ERROR\n" + result);
-			}
-			pathPattern = "[filePath=" + path + "]";
-		} else {
-			logger.info("Received a request for deploying a process of the input content...");
-		}
-
-		String state = "";
-		try {
-			variablesMap.put(ZflowConstant.PROCESS_DEPLOY_FORCE, ZflowConstant.FLAG_YES_UPPER);
-			DeployProcessService deployProcessService = new DeployProcessService();
-			state = deployProcessService.doService(variablesMap);
-		} catch (Exception e) {
-			result = "Exception happened while deploying process" + pathPattern
-					+ ", this process deployment is [Failed]!";
-			return JsonUtil.toJson("ERROR\n" + result + "\n{" + e.getMessage() + "}");
-		}
-
-		result = state + "\nResult has already come out for deployment servive of process" + pathPattern
-				+ ", please check relevant log files or data tables for more information.";
-
-		return JsonUtil.toJson(result);
+		// put the flag of forcing to insert process into the parameters map
+		variablesMap.put(ZflowConstant.PROCESS_DEPLOY_FORCE, ZflowConstant.FLAG_YES_UPPER);
+		return this.deployProcess(variablesMap);
 	}
 
 	/**

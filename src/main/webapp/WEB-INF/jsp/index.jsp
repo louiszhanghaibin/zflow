@@ -101,9 +101,9 @@
 	}
 </script>
 <body>
-	<h1>zflow</h1><hr>
-	
-	
+	<div style="display: block; margin: 0 auto; width: 60%;">
+	<h1>zflow</h1></div><hr>
+	<div style="display: block; margin: 0 auto; width: 60%;">
 	<h3>start process</h3>
 	<h5>please input custom parameters below :</h5>
 	<form action="startProcess" method="post" onsubmit="return checkNull('processId')" id="spForm">
@@ -236,6 +236,7 @@
 	</form>
 	
 	<br/><br/><br/>
+	</div>
 	
 	</body>
 </html>

@@ -142,8 +142,8 @@ public class ProcessExecutionHandler extends AbstractHandler implements Handler 
 	private String doHandle(Map<String, String> variablesMap, ProcessEntity processEntity) throws Exception {
 
 		ProcessCfg process = processEntity.getProcess();
-		String processName = process.getName();
-		variablesMap.put(ZflowConstant.PROCESS_NAME, processName);
+		String processIdPattern = "[processId=" + process.getId() + "]";
+		variablesMap.put(ZflowConstant.PROCESS_NAME, process.getName());
 		// initialize the flow entity
 		FlowEntity flow = newFlowInit(processEntity, variablesMap);
 
@@ -155,7 +155,7 @@ public class ProcessExecutionHandler extends AbstractHandler implements Handler 
 		flowDao.insertFlow(flow);
 
 		if (null == process.getStart()) {
-			logger.error("Process[" + processName + "] does not contain a valid START node!");
+			logger.error("Process" + processIdPattern + " does not contain a valid START node!");
 			updateFlow(flowDao, ZflowConstant.TASK_STATE_ERROR, flow);
 			return ZflowConstant.TASK_STATE_ERROR;
 		}
@@ -163,7 +163,7 @@ public class ProcessExecutionHandler extends AbstractHandler implements Handler 
 		String nodeName = process.getStart().getTransition().getTo();
 		// find out if the process has a valid start
 		if (null == nodeName || 0 == nodeName.length()) {
-			logger.error("Process[" + processName + "] does not contain a valid START[start="
+			logger.error("Process" + processIdPattern + " does not contain a valid START[start="
 					+ process.getStart().toString() + "] service node!");
 			updateFlow(flowDao, ZflowConstant.TASK_STATE_ERROR, flow);
 			return ZflowConstant.TASK_STATE_ERROR;
@@ -172,7 +172,7 @@ public class ProcessExecutionHandler extends AbstractHandler implements Handler 
 		// get the nodes for start execution by its name
 		List<NodeCfg> startNodes = ProcessXmlParseUtil.getNextNodes(process, process.getStart().getTransition());
 		if (1 != startNodes.size()) {
-			logger.error("Process[" + processName + "] does not contain one and only valid node[name=" + nodeName
+			logger.error("Process" + processIdPattern + " does not contain one and only valid node[name=" + nodeName
 					+ "] for starting execution according to node START[start=" + process.getStart().toString()
 					+ "],process cannot start to execute!");
 			updateFlow(flowDao, ZflowConstant.TASK_STATE_ERROR, flow);
@@ -204,6 +204,8 @@ public class ProcessExecutionHandler extends AbstractHandler implements Handler 
 				// all tasks or child processes successfully,so this flow can be ended by
 				// reset the "isEnd" flag value to TRUE
 				if (ZflowConstant.NODE_TYPE_END.equals(node.getType())) {
+					logger.info(idPattern + "Reaching a END node, process" + processIdPattern
+							+ " execution is finashing...");
 					isEnd = true;
 				}
 
@@ -211,6 +213,9 @@ public class ProcessExecutionHandler extends AbstractHandler implements Handler 
 				// from the fork node
 				if (ZflowConstant.NODE_TYPE_FORK.equals(node.getType())) {
 					ForkCfg forkCfg = (ForkCfg) node;
+					logger.info(idPattern
+							+ "Reaching a FROK node, those transition jobs will be executed parallelly in this fork node:["
+							+ forkCfg.toString() + "]...");
 					// add the nodes for upcoming execution into the list
 					nextTransList.addAll(forkCfg.getTransitions());
 					isForkExecution = true;
@@ -268,7 +273,7 @@ public class ProcessExecutionHandler extends AbstractHandler implements Handler 
 			return ZflowConstant.TASK_STATE_ERROR;
 		}
 
-		logger.info(idPattern + "Process[name=" + processName + "] executed successfully, this flow is ["
+		logger.info(idPattern + "Process" + processIdPattern + " executed successfully, this flow is ["
 				+ ZflowConstant.STATE_FINISH + "]!");
 		updateFlow(flowDao, ZflowConstant.STATE_FINISH, flow);
 		return ZflowConstant.STATE_FINISH;

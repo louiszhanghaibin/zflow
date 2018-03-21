@@ -45,6 +45,36 @@ public class PlanScheduler implements ApplicationListener<ApplicationReadyEvent>
 	private static String JOB_GROUP = "DEFAULT";
 	private static String TRIGGER_GROUP = "DEFAULT";
 
+	@Override
+	public void onApplicationEvent(ApplicationReadyEvent event) {
+		this.start();
+	}
+
+	/**
+	 * start to add timed tasks into scheduler
+	 * 
+	 * @author zhang
+	 * @time 2018年3月21日下午2:21:00
+	 */
+	public void start() {
+		logger.info("Start to initializing scheduled plans...");
+		// 取了AF_SCHEDULE表的所有数据，一行记录代表某个省某次对账
+		ScheduleDao scheduleDao = (ScheduleDao) SpringUtil.getBean(ScheduleDao.class);
+		List<PlanEntity> list = scheduleDao.selectAll();
+		if (null == list || list.isEmpty()) {
+			logger.info("There is no timed plan for schedule.");
+		}
+		for (PlanEntity p : list) {
+			try {
+				logger.info("Add Plan : {}", p);
+				// 把Plan放到quartz的一个定时任务中
+				addPlan(p);
+			} catch (SchedulerException | ParseException e) {
+				logger.error("Exception happend whend add plan :" + p, e);
+			}
+		}
+	}
+
 	/**
 	 * add timed tasks into scheduler by quartz
 	 * 
@@ -120,35 +150,5 @@ public class PlanScheduler implements ApplicationListener<ApplicationReadyEvent>
 
 		}
 
-	}
-
-	/**
-	 * start to add timed tasks into scheduler
-	 * 
-	 * @author zhang
-	 * @time 2018年3月21日下午2:21:00
-	 */
-	public void start() {
-		logger.info("Start to initializing scheduled plans...");
-		// 取了AF_SCHEDULE表的所有数据，一行记录代表某个省某次对账
-		ScheduleDao scheduleDao = (ScheduleDao) SpringUtil.getBean(ScheduleDao.class);
-		List<PlanEntity> list = scheduleDao.selectAll();
-		if (null == list || list.isEmpty()) {
-			logger.info("There is no timed plan for schedule.");
-		}
-		for (PlanEntity p : list) {
-			try {
-				logger.info("Add Plan : {}", p);
-				// 把Plan放到quartz的一个定时任务中
-				addPlan(p);
-			} catch (SchedulerException | ParseException e) {
-				logger.error("Exception happend whend add plan :" + p, e);
-			}
-		}
-	}
-
-	@Override
-	public void onApplicationEvent(ApplicationReadyEvent event) {
-		this.start();
 	}
 }

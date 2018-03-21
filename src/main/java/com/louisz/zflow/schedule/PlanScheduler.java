@@ -45,7 +45,16 @@ public class PlanScheduler implements ApplicationListener<ApplicationReadyEvent>
 	private static String JOB_GROUP = "DEFAULT";
 	private static String TRIGGER_GROUP = "DEFAULT";
 
-	public void addPlan(PlanEntity plan) throws SchedulerException, ParseException {
+	/**
+	 * add timed tasks into scheduler by quartz
+	 * 
+	 * @author zhang
+	 * @time 2018年3月21日下午2:16:23
+	 * @param plan
+	 * @throws SchedulerException
+	 * @throws ParseException
+	 */
+	private void addPlan(PlanEntity plan) throws SchedulerException, ParseException {
 
 		// establishing timed tasks by using quartz
 		JobDetail jobDetail = JobBuilder.newJob(PlanJob.class).withIdentity(plan.getId(), JOB_GROUP).build();
@@ -60,7 +69,26 @@ public class PlanScheduler implements ApplicationListener<ApplicationReadyEvent>
 
 	}
 
-	public static class PlanJob implements Job {
+	/**
+	 * clear all timed tasks in scheduler
+	 * 
+	 * @author zhang
+	 * @time 2018年3月21日下午2:17:40
+	 * @throws Exception
+	 */
+	public void clearSchedule() throws Exception {
+		logger.info("Clearing all timed tasks in schedule...");
+		try {
+			Scheduler scheduler = sf.getScheduler();
+			scheduler.clear();
+		} catch (Exception e) {
+			logger.error("Exception happend while clearing schedule!");
+			throw e;
+		}
+
+	}
+
+	protected static class PlanJob implements Job {
 
 		private static Logger logger = LoggerFactory.getLogger(PlanJob.class);
 
@@ -94,7 +122,14 @@ public class PlanScheduler implements ApplicationListener<ApplicationReadyEvent>
 
 	}
 
-	private void start() {
+	/**
+	 * start to add timed tasks into scheduler
+	 * 
+	 * @author zhang
+	 * @time 2018年3月21日下午2:21:00
+	 */
+	public void start() {
+		logger.info("Start to initializing scheduled plans...");
 		// 取了AF_SCHEDULE表的所有数据，一行记录代表某个省某次对账
 		ScheduleDao scheduleDao = (ScheduleDao) SpringUtil.getBean(ScheduleDao.class);
 		List<PlanEntity> list = scheduleDao.selectAll();
@@ -114,7 +149,6 @@ public class PlanScheduler implements ApplicationListener<ApplicationReadyEvent>
 
 	@Override
 	public void onApplicationEvent(ApplicationReadyEvent event) {
-		logger.info("Start to initializing scheduled plans...");
 		this.start();
 	}
 }

@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.louisz.zflow.constant.ZflowConstant;
+import com.louisz.zflow.schedule.PlanScheduler;
 import com.louisz.zflow.service.DeployProcessService;
 import com.louisz.zflow.service.StartProcessService;
 import com.louisz.zflow.util.JsonUtil;
@@ -30,6 +31,8 @@ import com.louisz.zflow.util.JsonUtil;
 public class CallServiceController {
 	@Resource
 	StartProcessService service;
+	@Resource
+	PlanScheduler planScheduler;
 
 	Logger logger = LoggerFactory.getLogger(CallServiceController.class);
 
@@ -90,6 +93,14 @@ public class CallServiceController {
 		return JsonUtil.toJson(result);
 	}
 
+	/**
+	 * controller for deploy a process entity into data base
+	 * 
+	 * @author zhang
+	 * @time 2018年3月21日下午2:32:00
+	 * @param variablesMap
+	 * @return
+	 */
 	@RequestMapping(value = "/deployProcess", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
 	@ResponseBody
 	public String deployProcess(@RequestBody Map<String, String> variablesMap) {
@@ -135,12 +146,47 @@ public class CallServiceController {
 		return JsonUtil.toJson(result);
 	}
 
+	/**
+	 * controller for forcing insert process into data base
+	 * 
+	 * @author zhang
+	 * @time 2018年3月21日下午2:31:32
+	 * @param variablesMap
+	 * @return
+	 */
 	@RequestMapping(value = "/forceInsertProcess", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
 	@ResponseBody
 	public String forceInsertProcess(@RequestBody Map<String, String> variablesMap) {
 		// put the flag of forcing to insert process into the parameters map
 		variablesMap.put(ZflowConstant.PROCESS_DEPLOY_FORCE, ZflowConstant.FLAG_YES_UPPER);
 		return this.deployProcess(variablesMap);
+	}
+
+	/**
+	 * controller for refreshing schedule requests
+	 * 
+	 * @author zhang
+	 * @time 2018年3月21日下午2:30:50
+	 * @param variablesMap
+	 * @return
+	 */
+	@RequestMapping(value = "/refreshSchedule", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
+	@ResponseBody
+	public String refreshSchedule(@RequestBody Map<String, String> variablesMap) {
+		logger.info("Received a request for refresh timed tasks in schedule...");
+		String result = "";
+		// trigger refresh timed tasks from schedule
+		try {
+			planScheduler.clearSchedule();
+			planScheduler.start();
+			result = "Schedule has been refreshed successfully!";
+			logger.info(result);
+			return JsonUtil.toJson(ZflowConstant.STATE_SUCCESS + "\n" + result);
+		} catch (Exception e) {
+			result = "Exception happend while refreshing schedule!";
+			logger.warn(result, e);
+			return JsonUtil.toJson(ZflowConstant.STATE_FAILED + "\n" + result);
+		}
 	}
 
 	/**

@@ -216,5 +216,26 @@
 		</table>
 	</form>
 		
-</body>
+	<br/><br/><br/>
+	<h3>schedule</h3>
+	<h5>please click the button below if you want to refresh cached timed tasks from schedule</h5>
+	<form action="/refreshSchedule" method="post" >
+		<table>
+			<tbody id="refreshScheduleTbody">
+				<tr>
+					<td><input type="hidden" value="refreshSchedule"></td>
+					<td><input type="hidden" id="refreshSchedule" value="refreshSchedule"></td>
+				</tr>
+			</tbody>
+			<tr>
+				<td align="right"></td>
+				<td align="left">
+				<td><input type="button" value="refresh schedule" onclick="doSubmit('refreshSchedule', '/refreshSchedule', 'refreshScheduleTbody')"></td>
+			</tr>
+		</table>
+	</form>
+	
+	<br/><br/><br/>
+	
+	</body>
 </html>

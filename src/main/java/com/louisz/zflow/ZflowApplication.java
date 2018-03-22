@@ -4,10 +4,7 @@ import org.mybatis.spring.annotation.MapperScan;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
-import org.springframework.cloud.client.loadbalancer.LoadBalanced;
-import org.springframework.context.annotation.Bean;
 import org.springframework.scheduling.annotation.EnableAsync;
-import org.springframework.web.client.AsyncRestTemplate;
 
 /**
  * @author zhang
@@ -21,11 +18,5 @@ import org.springframework.web.client.AsyncRestTemplate;
 public class ZflowApplication {
 	public static void main(String[] args) {
 		SpringApplication.run(ZflowApplication.class, args);
-	}
-
-	@Bean
-	@LoadBalanced
-	AsyncRestTemplate restTemplate() {
-		return new AsyncRestTemplate();
 	}
 }

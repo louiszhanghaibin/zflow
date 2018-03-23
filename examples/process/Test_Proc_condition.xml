@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE xml>
+<process id="Test_Proc_condition" name="Test_Proc_condition">
+	<condition expression="testPram!=100" />
+	<start name="start">
+		<transition to="test" />
+	</start>
+	<task name="test" refUri="http://ZFLOW/clientTest">
+		<condition expression="testPram!=200" />
+		<transition to="end" />
+	</task>
+	<end name="end" />
+</process>

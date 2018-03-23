@@ -111,7 +111,7 @@ public abstract class AbstractHandler {
 				ExpressionEvaluaterUtil evaluaterUtil = SpringUtil.getBean(ExpressionEvaluaterUtil.class);
 				if (!evaluaterUtil.checkExpression(conditionCfg.getExpression(), vMap)) {
 					logger.info("Node execution did not satisfy the conditon[" + conditionCfg.getExpression()
-							+ "], this execution is stopped!");
+							+ "], this execution is terminated!");
 					return false;
 				}
 			}

@@ -29,6 +29,17 @@ public class ProcessCfg implements NodeCfg {
 	private List<ForkCfg> forks;
 	@XStreamImplicit
 	private List<JoinCfg> joins;
+	@XStreamImplicit
+	private List<ConditionCfg> conditions;
+
+	@Override
+	public List<ConditionCfg> getConditions() {
+		return conditions;
+	}
+
+	public void setConditions(List<ConditionCfg> conditions) {
+		this.conditions = conditions;
+	}
 
 	private RepeatCfg repeat;
 
@@ -120,6 +131,7 @@ public class ProcessCfg implements NodeCfg {
 		this.name = name;
 	}
 
+	@Override
 	public TransitionCfg getTransition() {
 		return transition;
 	}
@@ -130,7 +142,6 @@ public class ProcessCfg implements NodeCfg {
 
 	@Override
 	public List<TransitionCfg> getTransitions() {
-		// TODO Auto-generated method stub
 		return null;
 	}
 

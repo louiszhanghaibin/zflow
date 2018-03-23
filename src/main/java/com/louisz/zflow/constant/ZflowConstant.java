@@ -10,17 +10,23 @@ public class ZflowConstant {
 	public static final String FLAG_YES_UPPER = "YES";
 	public static final String FLAG_NO_LOWER = "no";
 	public static final String FLAG_NO_UPPER = "NO";
+	public static final String BOOLEAN_TRUE = "true";
+	public static final String BOOLEAN_FALSE = "false";
 
 	public static final String ID_UPPER = "ID";
 	public static final String ID_LOWER = "id";
 	public static final String JOB_ID = "jobId";
 
-	public static final String REPEAT = "repeat";
-	public static final String LOOP = "loop";
-	public static final String TIME_INTERVAL = "interval";
+	public static final String CONDITION_UPPER = "CONDITION";
+	public static final String CONDITION_REFCLASS = "CONDITION_REFCLASS";
+	public static final String CONDITION_EXPRESSION = "CONDITION_EXPRESSION";
+
+	public static final String REPEAT = "REPEAT_PARAMETERS";
+	public static final String LOOP = "REPEAT_LOOP";
+	public static final String TIME_INTERVAL = "REPEAT_INTERVAL";
 	public static final String REPEAT_SYMBOL_REGX = "\\(|\\)|\\s";
 	public static final String REPEAT_TIME_INTERVAL = "REPEAT_TIME_INTERVAL";
-	public static final String REPEAT_QUIT = "quit";
+	public static final String REPEAT_QUIT = "REPEAT_QUIT";
 	public static final String REPEAT_QUIT_ON_FAILURE = "onFailure";
 	public static final String REPEAT_QUIT_ON_SUCCESS = "onSuccess";
 

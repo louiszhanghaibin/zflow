@@ -10,6 +10,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.RestTemplate;
 
+import com.louisz.zflow.constant.Result;
 import com.louisz.zflow.constant.ZflowConstant;
 import com.louisz.zflow.dao.TaskDao;
 import com.louisz.zflow.entity.ReturnResult;
@@ -35,7 +36,7 @@ public class TaskExecutionHandler extends AbstractHandler implements Handler {
 	 * main handling method
 	 */
 	@Override
-	public Object handle(Map<String, String> variablesMap, NodeCfg node) throws Exception {
+	public ReturnResult handle(Map<String, String> variablesMap, NodeCfg node) throws Exception {
 		Map<String, String> vMap = new HashMap<>();
 		vMap.putAll(variablesMap);
 		TaskCfg task = (TaskCfg) node;
@@ -51,7 +52,18 @@ public class TaskExecutionHandler extends AbstractHandler implements Handler {
 		logger.info(
 				jobIdPattern + "Handling task" + taskNamePattern + " execution of process" + processIdPattern + "...");
 
-		String result = "";
+		try {
+			if (!isPassConditions(node, vMap)) {
+				String mString = "Task" + taskNamePattern
+						+ " execution did not pass the conditions check,so program returned SUCCESS state directly to terminate this execution!";
+				logger.info(jobIdPattern + mString);
+				return new ReturnResult(Result.SUCCESS, mString);
+			}
+		} catch (Exception e) {
+			throw e;
+		}
+
+		ReturnResult result = new ReturnResult();
 		if (isLooporRepeat(vMap, node)) {
 			result = doRepeatHandle(vMap, task);
 		} else {
@@ -71,21 +83,20 @@ public class TaskExecutionHandler extends AbstractHandler implements Handler {
 	 * @return
 	 * @throws Exception
 	 */
-	private String doRepeatHandle(Map<String, String> variablesMap, TaskCfg taskCfg) throws Exception {
+	private ReturnResult doRepeatHandle(Map<String, String> variablesMap, TaskCfg taskCfg) throws Exception {
 		String taskNamePattern = "[name=" + taskCfg.getName() + "]";
 		String jobIdPattern = "[jobId=" + variablesMap.get(ZflowConstant.JOB_ID) + "]";
 
 		List<Map<String, String>> vMaps = getRepetitionMapList(variablesMap, taskCfg);
 
-		List<String> results = new LinkedList<>();
+		List<ReturnResult> results = new LinkedList<>();
 		int size = vMaps.size();
 		int count = 0;
-		String result = "";
 		for (Map<String, String> map : vMaps) {
 			count++;
-			String res = this.doHandle(map, taskCfg);
+			ReturnResult res = this.doHandle(map, taskCfg);
 			results.add(res);
-			if (isQuit(result, taskCfg, map)) {
+			if (isQuit(res, taskCfg, map)) {
 				return res;
 			}
 			int interval = Integer.parseInt(map.get(ZflowConstant.REPEAT_TIME_INTERVAL));
@@ -95,16 +106,18 @@ public class TaskExecutionHandler extends AbstractHandler implements Handler {
 			return results.get(0);
 		}
 
+		ReturnResult result = null;
 		String msg = jobIdPattern + "Task" + taskNamePattern + " has been executed for " + count
 				+ " times, result for these executions are:[";
-		for (String res : results) {
+		for (ReturnResult res : results) {
 			msg += res + ";";
-			if (ZflowConstant.STATE_SUCCESS.equals(res)) {
+			if (Result.SUCCESS == res.getResult()) {
 				result = res;
 			}
 		}
 		msg += "].As there is no configuration for executions' quiting policy, the final result will be estimated by default"
-				+ "(FINISHED if there is at least one execution succeeded)!So, the final result is [" + result + "]!";
+				+ "(FINISHED if there is at least one execution succeeded)!So, the final result is ["
+				+ result.getResult() + "]!";
 		logger.info(msg);
 
 		return result;
@@ -120,7 +133,7 @@ public class TaskExecutionHandler extends AbstractHandler implements Handler {
 	 * @return
 	 * @throws Exception
 	 */
-	private String doHandle(Map<String, String> vMap, TaskCfg taskCfg) throws Exception {
+	private ReturnResult doHandle(Map<String, String> vMap, TaskCfg taskCfg) throws Exception {
 		String processIdPattern = "[processId=" + vMap.get(ZflowConstant.PROCESS_ID) + "]";
 		String jobIdPattern = "[jobId=" + vMap.get(ZflowConstant.JOB_ID) + "]";
 
@@ -147,7 +160,7 @@ public class TaskExecutionHandler extends AbstractHandler implements Handler {
 			String message = "Exception happened while request URL[" + uri + "]!";
 			logger.error(message, e);
 			updateTaskStateMessage(ZflowConstant.TASK_STATE_ERROR, task, message);
-			return ZflowConstant.TASK_STATE_FAILED;
+			return new ReturnResult(Result.ERROR, message);
 		}
 
 		// get IP and PROT information from response entity
@@ -169,26 +182,26 @@ public class TaskExecutionHandler extends AbstractHandler implements Handler {
 		switch (taskCase) {
 		case ZflowConstant.TASK_STATE_SUCCESS:
 			updateTaskStateMessage(ZflowConstant.TASK_STATE_SUCCESS, task, message);
-			return ZflowConstant.TASK_STATE_SUCCESS;
+			return result;
 
 		case ZflowConstant.TASK_STATE_FAILED:
 			updateTaskStateMessage(ZflowConstant.TASK_STATE_FAILED, task, message);
-			return ZflowConstant.TASK_STATE_FAILED;
+			return result;
 
 		case ZflowConstant.TASK_STATE_ERROR:
 			updateTaskStateMessage(ZflowConstant.TASK_STATE_ERROR, task, message);
-			return ZflowConstant.TASK_STATE_FAILED;
+			return result;
 
 		case ZflowConstant.TASK_STATE_EXCEPTION:
 			updateTaskStateMessage(ZflowConstant.TASK_STATE_EXCEPTION, task, message);
-			return ZflowConstant.TASK_STATE_FAILED;
+			return result;
 
 		default:
 			message = jobIdPattern + "[" + ZflowConstant.TASK_STATE_ERROR + "]Task" + taskNamePattern + "in process"
 					+ processIdPattern + " execution encountered exception, service node[url=" + uri
 					+ "] did not response correctly![TASK_MASSAGE: " + result.getDescription() + "]";
 			updateTaskStateMessage(ZflowConstant.TASK_STATE_ERROR, task, message);
-			return ZflowConstant.TASK_STATE_ERROR;
+			return new ReturnResult(Result.ERROR, message);
 		}
 	}
 

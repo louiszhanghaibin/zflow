@@ -2,16 +2,23 @@ package com.louisz.zflow.handler;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.louisz.zflow.constant.Result;
 import com.louisz.zflow.constant.ZflowConstant;
+import com.louisz.zflow.entity.ReturnResult;
+import com.louisz.zflow.prcxmlcfg.ConditionCfg;
 import com.louisz.zflow.prcxmlcfg.FieldCfg;
 import com.louisz.zflow.prcxmlcfg.NodeCfg;
 import com.louisz.zflow.prcxmlcfg.RepeatCfg;
+import com.louisz.zflow.util.ELParseUtil;
+import com.louisz.zflow.util.ExpressionEvaluaterUtil;
+import com.louisz.zflow.util.SpringUtil;
 import com.louisz.zflow.util.StringUtil;
 
 /**
@@ -44,6 +51,73 @@ public abstract class AbstractHandler {
 		}
 
 		return vMap;
+	}
+
+	/**
+	 * if the node execution satisfies those conditions configured earlier
+	 * 
+	 * @author zhang
+	 * @time 2018年3月23日上午11:29:54
+	 * @param node
+	 * @param vMap
+	 * @return
+	 * @throws Exception
+	 */
+	protected boolean isPassConditions(NodeCfg node, Map<String, String> vMap) throws Exception {
+		if ((null == node.getConditions() || node.getConditions().isEmpty())
+				&& (StringUtil.isEmpty(vMap.get(ZflowConstant.CONDITION_REFCLASS))
+						&& StringUtil.isEmpty(vMap.get(ZflowConstant.CONDITION_EXPRESSION)))) {
+			return true;
+		}
+
+		boolean b = true;
+		List<ConditionCfg> conditions = new LinkedList<>();
+		if (!StringUtil.isEmpty(vMap.get(ZflowConstant.CONDITION_REFCLASS))) {
+			ConditionCfg cfg = new ConditionCfg();
+			cfg.setRefClass(vMap.get(ZflowConstant.CONDITION_REFCLASS));
+			conditions.add(cfg);
+		}
+		if (!StringUtil.isEmpty(vMap.get(ZflowConstant.CONDITION_EXPRESSION))) {
+			ConditionCfg cfg = new ConditionCfg();
+			cfg.setExpression(vMap.get(ZflowConstant.CONDITION_EXPRESSION));
+			;
+			conditions.add(cfg);
+		}
+		if (null != node.getConditions() && !node.getConditions().isEmpty()) {
+			conditions.addAll(node.getConditions());
+		}
+
+		for (ConditionCfg conditionCfg : conditions) {
+			if (!StringUtil.isEmpty(conditionCfg.getRefClass())) {
+				String result = ELParseUtil.reassemble(conditionCfg.getExpression());
+				switch (result) {
+				case ZflowConstant.BOOLEAN_TRUE:
+					b = true;
+					break;
+
+				case ZflowConstant.BOOLEAN_FALSE:
+					logger.info("Node execution did not satisfy this conditon: [" + conditionCfg.getRefClass()
+							+ "], this execution is terminated!");
+					return false;
+
+				default:
+					logger.error("Node condition[" + conditionCfg.getRefClass()
+							+ "] did not return a true or false result, cannot decide whether this condition is satisfied, return boolean FALSE by default!");
+					return false;
+				}
+			}
+
+			if (!StringUtil.isEmpty(conditionCfg.getExpression())) {
+				ExpressionEvaluaterUtil evaluaterUtil = SpringUtil.getBean(ExpressionEvaluaterUtil.class);
+				if (!evaluaterUtil.checkExpression(conditionCfg.getExpression(), vMap)) {
+					logger.info("Node execution did not satisfy the conditon[" + conditionCfg.getExpression()
+							+ "], this execution is stopped!");
+					return false;
+				}
+			}
+		}
+
+		return b;
 	}
 
 	/**
@@ -165,7 +239,7 @@ public abstract class AbstractHandler {
 	 * @return
 	 * @throws Exception
 	 */
-	protected boolean isQuit(String result, NodeCfg node, Map<String, String> vMap) throws Exception {
+	protected boolean isQuit(ReturnResult result, NodeCfg node, Map<String, String> vMap) throws Exception {
 		boolean b = false;
 		if (StringUtil.isEmpty(vMap.get(ZflowConstant.REPEAT_QUIT))
 				&& (null == node.getRepeat() || StringUtil.isEmpty(node.getRepeat().getQuit()))) {
@@ -181,10 +255,10 @@ public abstract class AbstractHandler {
 		}
 
 		if (ZflowConstant.REPEAT_QUIT_ON_FAILURE.equals(quit)
-				&& !(ZflowConstant.STATE_FINISH.equals(result) || ZflowConstant.STATE_SUCCESS.equals(result))) {
+				&& !(Result.FINISH == result.getResult() || Result.SUCCESS == result.getResult())) {
 			return true;
 		} else if (ZflowConstant.REPEAT_QUIT_ON_SUCCESS.equals(quit)
-				&& (ZflowConstant.STATE_FINISH.equals(result) || ZflowConstant.STATE_SUCCESS.equals(result))) {
+				&& (Result.FINISH == result.getResult() || Result.SUCCESS == result.getResult())) {
 			return true;
 		}
 

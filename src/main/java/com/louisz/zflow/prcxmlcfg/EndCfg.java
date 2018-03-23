@@ -47,4 +47,10 @@ public class EndCfg implements NodeCfg {
 		return null;
 	}
 
+	@Override
+	public List<ConditionCfg> getConditions() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
 }

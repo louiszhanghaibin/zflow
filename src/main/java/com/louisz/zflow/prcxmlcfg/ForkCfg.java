@@ -19,6 +19,17 @@ public class ForkCfg implements NodeCfg {
 	private String name = "";
 	@XStreamImplicit
 	private List<TransitionCfg> transitions = new ArrayList<>();
+	@XStreamImplicit
+	private List<ConditionCfg> conditions;
+
+	@Override
+	public List<ConditionCfg> getConditions() {
+		return conditions;
+	}
+
+	public void setConditions(List<ConditionCfg> conditions) {
+		this.conditions = conditions;
+	}
 
 	public List<TransitionCfg> getTransitions() {
 		return transitions;
@@ -38,7 +49,6 @@ public class ForkCfg implements NodeCfg {
 
 	@Override
 	public TransitionCfg getTransition() {
-		// TODO Auto-generated method stub
 		return null;
 	}
 
@@ -62,7 +72,6 @@ public class ForkCfg implements NodeCfg {
 
 	@Override
 	public RepeatCfg getRepeat() {
-		// TODO Auto-generated method stub
 		return null;
 	}
 

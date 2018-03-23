@@ -9,9 +9,11 @@ import org.apache.commons.lang.NullArgumentException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.louisz.zflow.constant.Result;
 import com.louisz.zflow.constant.ZflowConstant;
 import com.louisz.zflow.dao.ProcessDao;
 import com.louisz.zflow.entity.ProcessEntity;
+import com.louisz.zflow.entity.ReturnResult;
 import com.louisz.zflow.prcxmlcfg.NodeCfg;
 import com.louisz.zflow.prcxmlcfg.ProcessCfg;
 import com.louisz.zflow.util.DateUtil;
@@ -29,7 +31,7 @@ public class ProcessDeloyHandler implements Handler {
 	Logger logger = LoggerFactory.getLogger(ProcessDeloyHandler.class);
 
 	@Override
-	public Object handle(Map<String, String> variablesMap, NodeCfg node) throws Exception {
+	public ReturnResult handle(Map<String, String> variablesMap, NodeCfg node) throws Exception {
 		String jobIdPattern = "[jobId=" + variablesMap.get(ZflowConstant.JOB_ID) + "]";
 
 		logger.info(jobIdPattern + "Handling process deployment...");
@@ -56,7 +58,7 @@ public class ProcessDeloyHandler implements Handler {
 				String result = "The process ID[" + processId
 						+ "] is already in use, please check if the process is deployed or the processId of the pending process is repeated!";
 				logger.warn(result);
-				return result;
+				return new ReturnResult(Result.FAILED, result);
 			}
 			processDao.insertProcess(processEntity);
 		} catch (Exception e) {
@@ -66,9 +68,10 @@ public class ProcessDeloyHandler implements Handler {
 			throw e;
 		}
 
-		logger.info("[" + ZflowConstant.STATE_SUCCESS + "] for deploying process[processId=" + processId
-				+ "] into data base!");
-		return ZflowConstant.STATE_SUCCESS;
+		String mString = "[" + ZflowConstant.STATE_SUCCESS + "] for deploying process[processId=" + processId
+				+ "] into data base!";
+		logger.info(mString);
+		return new ReturnResult(Result.SUCCESS, mString);
 	}
 
 	/**

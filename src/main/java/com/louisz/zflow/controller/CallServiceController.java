@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.louisz.zflow.constant.ZflowConstant;
+import com.louisz.zflow.entity.ReturnResult;
 import com.louisz.zflow.schedule.PlanScheduler;
 import com.louisz.zflow.service.DeployProcessService;
 import com.louisz.zflow.service.StartProcessService;
@@ -77,16 +78,17 @@ public class CallServiceController {
 		logger.info("validation passed for launching process[processId=" + variablesMap.get(ZflowConstant.PROCESS_ID)
 				+ "]!");
 
-		String state = "";
+		ReturnResult returnResult;
 		try {
-			state = service.doService(variablesMap);
+			returnResult = service.doService(variablesMap);
 		} catch (Exception e) {
 			result = "Exception happened while launching a flow of process[processId="
 					+ variablesMap.get(ZflowConstant.PROCESS_ID) + "], this process execution is [Failed]!";
 			return JsonUtil.toJson("ERROR\n" + result + "\n{" + e.getMessage() + "}");
 		}
 
-		result = state + "\nResult has already come out for execution service of process[processId="
+		result = returnResult.getResult() + "\nMessage: " + returnResult.getDescription()
+				+ "\nResult has already come out for execution service of process[processId="
 				+ variablesMap.get(ZflowConstant.PROCESS_ID)
 				+ "], please check those relevant log files or data tables for more information.";
 
@@ -130,17 +132,18 @@ public class CallServiceController {
 			logger.info("Received a request for deploying a process of the input content...");
 		}
 
-		String state = "";
+		ReturnResult returnResult = null;
 		try {
 			DeployProcessService deployProcessService = new DeployProcessService();
-			state = deployProcessService.doService(variablesMap);
+			returnResult = deployProcessService.doService(variablesMap);
 		} catch (Exception e) {
 			result = "Exception happened while deploying process" + pathPattern
 					+ ", this process deployment is [Failed]!";
 			return JsonUtil.toJson("ERROR\n" + result + "\n{" + e.getMessage() + "}");
 		}
 
-		result = state + "\nResult has already come out for deployment servive of process" + pathPattern
+		result = returnResult.getResult() + "\nMessage: " + returnResult.getDescription()
+				+ "\nResult has already come out for deployment servive of process" + pathPattern
 				+ ", please check relevant log files or data tables for more information.";
 
 		return JsonUtil.toJson(result);

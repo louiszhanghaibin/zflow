@@ -2,6 +2,7 @@ package com.louisz.zflow.handler;
 
 import java.util.Map;
 
+import com.louisz.zflow.entity.ReturnResult;
 import com.louisz.zflow.prcxmlcfg.NodeCfg;
 
 /**
@@ -11,5 +12,5 @@ import com.louisz.zflow.prcxmlcfg.NodeCfg;
  */
 public interface Handler {
 
-	public Object handle(Map<String, String> variablesMap, NodeCfg node) throws Exception;
+	public ReturnResult handle(Map<String, String> variablesMap, NodeCfg node) throws Exception;
 }

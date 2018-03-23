@@ -6,5 +6,9 @@ public enum Result {
 	/** 失败 failed **/
 	FAILED,
 	/** 错误 error **/
-	ERROR;
+	ERROR,
+	/** exception **/
+	EXCEPTION,
+	/** finish **/
+	FINISH;
 }

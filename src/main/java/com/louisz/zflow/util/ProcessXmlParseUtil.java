@@ -8,6 +8,7 @@ import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.louisz.zflow.prcxmlcfg.ConditionCfg;
 import com.louisz.zflow.prcxmlcfg.EndCfg;
 import com.louisz.zflow.prcxmlcfg.FieldCfg;
 import com.louisz.zflow.prcxmlcfg.ForkCfg;
@@ -44,7 +45,7 @@ public class ProcessXmlParseUtil {
 		XStream.setupDefaultSecurity(xs);
 		xs.setMode(XStream.NO_REFERENCES);
 		Class<?>[] classes = new Class[] { ProcessCfg.class, TaskCfg.class, FieldCfg.class, ForkCfg.class,
-				JoinCfg.class, TransitionCfg.class, StartCfg.class, EndCfg.class };
+				JoinCfg.class, TransitionCfg.class, StartCfg.class, EndCfg.class, ConditionCfg.class };
 		xs.allowTypes(classes);
 		xs.processAnnotations(classes);
 		xs.autodetectAnnotations(true);

@@ -94,7 +94,7 @@ public class ELParseUtil {
 			try {
 				return invokeStaticMethod(classname, sfunc, objargs);
 			} catch (Exception e) {
-				logger.warn("调用静态方法时，出现异常", e);
+				logger.warn("Exception happend while invoke static method!", e);
 				return null;
 			}
 		}

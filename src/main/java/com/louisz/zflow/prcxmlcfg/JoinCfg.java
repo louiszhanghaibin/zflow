@@ -36,7 +36,6 @@ public class JoinCfg implements NodeCfg {
 
 	@Override
 	public List<TransitionCfg> getTransitions() {
-		// TODO Auto-generated method stub
 		return null;
 	}
 
@@ -47,7 +46,11 @@ public class JoinCfg implements NodeCfg {
 
 	@Override
 	public RepeatCfg getRepeat() {
-		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public List<ConditionCfg> getConditions() {
 		return null;
 	}
 

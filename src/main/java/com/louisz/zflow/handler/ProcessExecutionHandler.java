@@ -10,11 +10,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import com.louisz.zflow.constant.Result;
 import com.louisz.zflow.constant.ZflowConstant;
 import com.louisz.zflow.dao.FlowDao;
 import com.louisz.zflow.dao.ProcessDao;
 import com.louisz.zflow.entity.FlowEntity;
 import com.louisz.zflow.entity.ProcessEntity;
+import com.louisz.zflow.entity.ReturnResult;
 import com.louisz.zflow.prcxmlcfg.FieldCfg;
 import com.louisz.zflow.prcxmlcfg.ForkCfg;
 import com.louisz.zflow.prcxmlcfg.NodeCfg;
@@ -37,7 +39,7 @@ public class ProcessExecutionHandler extends AbstractHandler implements Handler 
 	private Logger logger = LoggerFactory.getLogger(this.getClass());
 
 	@Override
-	public Object handle(Map<String, String> variablesMap, NodeCfg nodeCfg) throws Exception {
+	public ReturnResult handle(Map<String, String> variablesMap, NodeCfg nodeCfg) throws Exception {
 		Map<String, String> vMap = new HashMap<>();
 		vMap.putAll(variablesMap);
 		String jobIdPattern = "[jobId=" + variablesMap.get(ZflowConstant.JOB_ID) + "]";
@@ -67,10 +69,22 @@ public class ProcessExecutionHandler extends AbstractHandler implements Handler 
 			String mString = "There is no process of [processId=" + processId
 					+ "] found, this process execution can not be started!";
 			logger.error(mString);
-			return "[ERROR!]\n" + mString;
+			return new ReturnResult(Result.ERROR, mString);
 		}
 
-		String result = "";
+		try {
+			NodeCfg node = (null != nodeCfg) ? nodeCfg : processEntity.getProcess();
+			if (!isPassConditions(node, vMap)) {
+				String mString = "Process[processId=" + processId
+						+ "] execution did not pass the conditions check,so program returned FINISH state directly to terminate this execution!";
+				logger.info(jobIdPattern + mString);
+				return new ReturnResult(Result.FINISH, mString);
+			}
+		} catch (Exception e) {
+			throw e;
+		}
+
+		ReturnResult result;
 		if (isLooporRepeat(vMap, nodeCfg)) {
 			result = doRepeatHandle(vMap, processEntity);
 		} else {
@@ -90,21 +104,21 @@ public class ProcessExecutionHandler extends AbstractHandler implements Handler 
 	 * @return
 	 * @throws Exception
 	 */
-	private String doRepeatHandle(Map<String, String> variablesMap, ProcessEntity processEntity) throws Exception {
+	private ReturnResult doRepeatHandle(Map<String, String> variablesMap, ProcessEntity processEntity)
+			throws Exception {
 		String processId = variablesMap.get(ZflowConstant.PROCESS_ID);
 		String jobIdPattern = "[jobId=" + variablesMap.get(ZflowConstant.JOB_ID) + "]";
 		ProcessCfg process = processEntity.getProcess();
 
 		List<Map<String, String>> vMaps = getRepetitionMapList(variablesMap, process);
-		List<String> results = new LinkedList<>();
+		List<ReturnResult> results = new LinkedList<>();
 		int size = vMaps.size();
 		int count = 0;
-		String result = "";
 		for (Map<String, String> map : vMaps) {
 			count++;
-			String res = this.doHandle(map, processEntity);
+			ReturnResult res = this.doHandle(map, processEntity);
 			results.add(res);
-			if (isQuit(result, process, map)) {
+			if (isQuit(res, process, map)) {
 				return res;
 			}
 			int interval = Integer.parseInt(map.get(ZflowConstant.REPEAT_TIME_INTERVAL));
@@ -114,16 +128,18 @@ public class ProcessExecutionHandler extends AbstractHandler implements Handler 
 			return results.get(0);
 		}
 
+		ReturnResult result = new ReturnResult();
 		String msg = jobIdPattern + "Process[" + processId + "] has been executed for " + count
 				+ " times, result for these executions are:[";
-		for (String res : results) {
-			msg += res + ";";
-			if (ZflowConstant.STATE_FINISH.equals(res)) {
+		for (ReturnResult res : results) {
+			msg += res.getResult().toString() + ";";
+			if (Result.FINISH == res.getResult()) {
 				result = res;
 			}
 		}
 		msg += "].As there is no configuration for executions' quiting policy, the final result will be estimated by default"
-				+ "(FINISHED if there is at least one execution succeeded)!So, the final result is [" + result + "]!";
+				+ "(FINISHED if there is at least one execution succeeded)!So, the final result is ["
+				+ result.getResult() + "]!";
 		logger.info(msg);
 
 		return result;
@@ -139,7 +155,7 @@ public class ProcessExecutionHandler extends AbstractHandler implements Handler 
 	 * @return
 	 * @throws Exception
 	 */
-	private String doHandle(Map<String, String> variablesMap, ProcessEntity processEntity) throws Exception {
+	private ReturnResult doHandle(Map<String, String> variablesMap, ProcessEntity processEntity) throws Exception {
 
 		ProcessCfg process = processEntity.getProcess();
 		String processIdPattern = "[processId=" + process.getId() + "]";
@@ -155,28 +171,31 @@ public class ProcessExecutionHandler extends AbstractHandler implements Handler 
 		flowDao.insertFlow(flow);
 
 		if (null == process.getStart()) {
-			logger.error("Process" + processIdPattern + " does not contain a valid START node!");
+			String mString = "Process" + processIdPattern + " does not contain a valid START node!";
+			logger.error(mString);
 			updateFlow(flowDao, ZflowConstant.TASK_STATE_ERROR, flow);
-			return ZflowConstant.TASK_STATE_ERROR;
+			return new ReturnResult(Result.ERROR, mString);
 		}
 
 		String nodeName = process.getStart().getTransition().getTo();
 		// find out if the process has a valid start
 		if (null == nodeName || 0 == nodeName.length()) {
-			logger.error("Process" + processIdPattern + " does not contain a valid START[start="
-					+ process.getStart().toString() + "] service node!");
+			String mString = "Process" + processIdPattern + " does not contain a valid START[start="
+					+ process.getStart().toString() + "] service node!";
+			logger.error(mString);
 			updateFlow(flowDao, ZflowConstant.TASK_STATE_ERROR, flow);
-			return ZflowConstant.TASK_STATE_ERROR;
+			return new ReturnResult(Result.ERROR, mString);
 		}
 
 		// get the nodes for start execution by its name
 		List<NodeCfg> startNodes = ProcessXmlParseUtil.getNextNodes(process, process.getStart().getTransition());
 		if (1 != startNodes.size()) {
-			logger.error("Process" + processIdPattern + " does not contain one and only valid node[name=" + nodeName
+			String mString = "Process" + processIdPattern + " does not contain one and only valid node[name=" + nodeName
 					+ "] for starting execution according to node START[start=" + process.getStart().toString()
-					+ "],process cannot start to execute!");
+					+ "],process cannot start to execute!";
+			logger.error(mString);
 			updateFlow(flowDao, ZflowConstant.TASK_STATE_ERROR, flow);
-			return ZflowConstant.TASK_STATE_ERROR;
+			return new ReturnResult(Result.ERROR, mString);
 		}
 
 		// do the node executions, all the same level nodes can execute asynchronously
@@ -188,7 +207,7 @@ public class ProcessExecutionHandler extends AbstractHandler implements Handler 
 			nextNodesMap.put(node.getName(), node);
 		}
 
-		Map<String, Future<String>> futuresMap = new HashMap<>();
+		Map<String, Future<ReturnResult>> futuresMap = new HashMap<>();
 		List<TransitionCfg> nextTransList = new LinkedList<>();
 		// set a flag for check if the running execution is a fork node or not
 		boolean isForkExecution = false;
@@ -222,7 +241,7 @@ public class ProcessExecutionHandler extends AbstractHandler implements Handler 
 				}
 
 				try {
-					Future<String> future = asyncExecutorUtil.asyncExecutor(node, variablesMap);
+					Future<ReturnResult> future = asyncExecutorUtil.asyncExecutor(node, variablesMap);
 					// if the running node is a fork from former FORK node("isForkExecution" being
 					// true) and it does not contain a
 					// valid transition node, then it is a execution that should run on its own and
@@ -245,14 +264,14 @@ public class ProcessExecutionHandler extends AbstractHandler implements Handler 
 			// execution by returning a failed state
 			boolean b = true;
 			for (String name : futuresMap.keySet()) {
-				Future<String> future = futuresMap.get(name);
-				b = (ZflowConstant.STATE_FINISH.equals(future.get())
-						|| ZflowConstant.TASK_STATE_SUCCESS.equals(future.get()));
+				Future<ReturnResult> future = futuresMap.get(name);
+				b = (Result.FINISH == future.get().getResult() || Result.SUCCESS == future.get().getResult());
 				if (!b) {
-					logger.warn(idPattern + "Node[name=" + name + "] execution is [" + ZflowConstant.STATE_FAILED
-							+ "], this flow is [" + ZflowConstant.STATE_FAILED + "]!");
+					String mString = idPattern + "Node[name=" + name + "] execution is [" + ZflowConstant.STATE_FAILED
+							+ "], this flow is [" + ZflowConstant.STATE_FAILED + "]!";
+					logger.warn(mString);
 					updateFlow(flowDao, ZflowConstant.STATE_FAILED, flow);
-					return ZflowConstant.STATE_FAILED;
+					return new ReturnResult(Result.FAILED, mString);
 				}
 			}
 
@@ -266,17 +285,19 @@ public class ProcessExecutionHandler extends AbstractHandler implements Handler 
 		// if the flow execution ends with not reaching the end node, then it must
 		// encounter some error
 		if (!isEnd) {
-			logger.info("Flow[name=" + flow.getName() + ", ID=" + flow.getId()
+			String mString = "Flow[name=" + flow.getName() + ", ID=" + flow.getId()
 					+ "] execution encountered some error, this flow's state is [" + ZflowConstant.TASK_STATE_ERROR
-					+ "]!");
+					+ "]!";
+			logger.info(mString);
 			updateFlow(flowDao, ZflowConstant.TASK_STATE_ERROR, flow);
-			return ZflowConstant.TASK_STATE_ERROR;
+			return new ReturnResult(Result.ERROR, mString);
 		}
 
-		logger.info(idPattern + "Process" + processIdPattern + " executed successfully, this flow is ["
-				+ ZflowConstant.STATE_FINISH + "]!");
+		String msg = idPattern + "Process" + processIdPattern + " executed successfully, this flow is ["
+				+ ZflowConstant.STATE_FINISH + "]!";
+		logger.info(msg);
 		updateFlow(flowDao, ZflowConstant.STATE_FINISH, flow);
-		return ZflowConstant.STATE_FINISH;
+		return new ReturnResult(Result.FINISH, msg);
 	}
 
 	/**

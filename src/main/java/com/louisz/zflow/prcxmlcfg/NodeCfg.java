@@ -23,4 +23,6 @@ public interface NodeCfg {
 
 	public RepeatCfg getRepeat();
 
+	public List<ConditionCfg> getConditions();
+
 }

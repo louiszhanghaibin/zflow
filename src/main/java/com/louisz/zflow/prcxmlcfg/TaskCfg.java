@@ -27,15 +27,21 @@ public class TaskCfg implements NodeCfg {
 
 	@XStreamImplicit
 	private List<FieldCfg> fields = new ArrayList<>();
+	@XStreamImplicit
+	private List<ConditionCfg> conditions;
 
 	private RepeatCfg repeat;
+
+	public void setConditions(List<ConditionCfg> conditions) {
+		this.conditions = conditions;
+	}
 
 	@Override
 	public RepeatCfg getRepeat() {
 		return repeat;
 	}
 
-	public void setReapeat(RepeatCfg repeat) {
+	public void setRepeat(RepeatCfg repeat) {
 		this.repeat = repeat;
 	}
 
@@ -88,13 +94,17 @@ public class TaskCfg implements NodeCfg {
 
 	@Override
 	public List<TransitionCfg> getTransitions() {
-		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
 	public String getType() {
 		return ZflowConstant.NODE_TYPE_TASK;
+	}
+
+	@Override
+	public List<ConditionCfg> getConditions() {
+		return conditions;
 	}
 
 }

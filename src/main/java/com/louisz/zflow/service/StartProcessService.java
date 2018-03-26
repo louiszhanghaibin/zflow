@@ -24,7 +24,7 @@ public class StartProcessService {
 		String jobId = "PROCESS-EXECUTION-JOB-" + Integer.toString(SequenceUtil.getSequence());
 		variablesMap.put(ZflowConstant.JOB_ID, jobId);
 
-		logger.info("[jobId=" + jobId + "]Start to launch a new flow of process[processId="
+		logger.info("[jobId=" + jobId + "]Start service of executing process[processId="
 				+ variablesMap.get(ZflowConstant.PROCESS_ID) + "],input parameters are" + variablesMap.toString()
 				+ "...");
 		ProcessExecutionHandler flowExecutionHandler = new ProcessExecutionHandler();

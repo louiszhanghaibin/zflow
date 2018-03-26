@@ -18,8 +18,8 @@ public class DeployProcessService {
 		String jobId = "PROCESS-DEPLOYMENT-JOB-" + Integer.toString(SequenceUtil.getSequence());
 		variablesMap.put(ZflowConstant.JOB_ID, jobId);
 
-		logger.info("[jobId=" + jobId + "]Start to deploy a process, input parameters are" + variablesMap.toString()
-				+ "...");
+		logger.info("[jobId=" + jobId + "]Start service of deploying a process, input parameters are"
+				+ variablesMap.toString() + "...");
 
 		try {
 			ProcessDeloyHandler handler = new ProcessDeloyHandler();

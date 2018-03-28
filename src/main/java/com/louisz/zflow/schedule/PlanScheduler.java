@@ -69,8 +69,8 @@ public class PlanScheduler implements ApplicationListener<ApplicationReadyEvent>
 				logger.info("Add Plan : {}", p);
 				// 把Plan放到quartz的一个定时任务中
 				addPlan(p);
-			} catch (SchedulerException | ParseException e) {
-				logger.error("Exception happend whend add plan :" + p, e);
+			} catch (Exception e) {
+				logger.error("Exception happened when add plan :" + p, e);
 			}
 		}
 	}
@@ -118,7 +118,7 @@ public class PlanScheduler implements ApplicationListener<ApplicationReadyEvent>
 
 	}
 
-	protected static class PlanJob implements Job {
+	public static class PlanJob implements Job {
 
 		private static Logger logger = LoggerFactory.getLogger(PlanJob.class);
 
@@ -140,7 +140,7 @@ public class PlanScheduler implements ApplicationListener<ApplicationReadyEvent>
 			try {
 				@SuppressWarnings("unchecked")
 				Map<String, String> args = JsonUtil.fromJson(var, Map.class);
-				StartProcessService service = (StartProcessService) SpringUtil.getBean("startFlowService");
+				StartProcessService service = (StartProcessService) SpringUtil.getBean(StartProcessService.class);
 				logger.info("Scheduler start plan : {}", plan);
 				// start those timed process executions
 				service.doService(args);

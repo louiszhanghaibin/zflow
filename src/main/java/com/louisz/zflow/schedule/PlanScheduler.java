@@ -70,7 +70,7 @@ public class PlanScheduler implements ApplicationListener<ApplicationReadyEvent>
 				// 把Plan放到quartz的一个定时任务中
 				addPlan(p);
 			} catch (Exception e) {
-				logger.error("Exception happened when add plan :" + p, e);
+				logger.error("Exception happened while adding plan :" + p, e);
 			}
 		}
 	}
@@ -112,7 +112,7 @@ public class PlanScheduler implements ApplicationListener<ApplicationReadyEvent>
 			Scheduler scheduler = sf.getScheduler();
 			scheduler.clear();
 		} catch (Exception e) {
-			logger.error("Exception happend while clearing schedule!");
+			logger.error("Exception happened while clearing schedule!", e);
 			throw e;
 		}
 

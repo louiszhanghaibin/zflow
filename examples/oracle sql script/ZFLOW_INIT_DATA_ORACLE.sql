@@ -37,3 +37,8 @@ Insert into ZF_PROCESS (ID,NAME,STATE,CONTENT,CREATETIME,UPDATETIME) values ('Te
 END;
 /
 COMMIT;
+
+
+
+-------------------------insert a schedule for test-----------------
+Insert into ZF_SCHEDULE (ID,PROCESSID,FLOWNAME,CRON,VARIABLES,STATE,CREATETIME,UPDATETIME) values ('SCH_TEST_01','Test_Proc','Test_Proc','* 1 * * * ?','{"processId":"Test_Proc","settleDate":#{com.louisz.zflow.util.DateUtil.getDate(-1)}}',1,'20180328-10:00',null);

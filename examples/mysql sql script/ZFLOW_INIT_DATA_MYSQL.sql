@@ -36,3 +36,8 @@ BEGIN
 Insert into ZF_PROCESS (ID,NAME,STATE,CONTENT,CREATETIME,UPDATETIME) values ('Proc_reparamonly_test','Proc_reparamonly_test',0,Proc_reparamonly_test,'20180319 17:18:15','20180319 17:18:15');
 Insert into ZF_PROCESS (ID,NAME,STATE,CONTENT,CREATETIME,UPDATETIME) values ('Test_Proc','Test_Proc',0,Test_Proc,'20180319 17:22:26','20180319 17:22:26');
 END;
+
+
+
+-------------------------insert a schedule for test-----------------
+Insert into ZF_SCHEDULE (ID,PROCESSID,FLOWNAME,CRON,VARIABLES,STATE,CREATETIME,UPDATETIME) values ('SCH_TEST_01','Test_Proc','Test_Proc','* 1 * * * ?','{"processId":"Test_Proc","settleDate":#{com.louisz.zflow.util.DateUtil.getDate(-1)}}',1,'20180328-10:00',null);

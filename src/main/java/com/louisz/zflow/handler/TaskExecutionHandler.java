@@ -110,7 +110,7 @@ public class TaskExecutionHandler extends AbstractHandler implements Handler {
 		String msg = jobIdPattern + "Task" + taskNamePattern + " has been executed for " + count
 				+ " times, result for these executions are:[";
 		for (ReturnResult res : results) {
-			msg += res + ";";
+			msg += res.getResult() + ";";
 			if (Result.SUCCESS == res.getResult()) {
 				result = res;
 			}
